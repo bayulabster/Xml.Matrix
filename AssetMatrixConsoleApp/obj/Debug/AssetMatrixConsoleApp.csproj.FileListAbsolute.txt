@@ -1,0 +1,6 @@
+c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.exe.config
+c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.exe
+c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.pdb
+c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csprojResolveAssemblyReference.cache
+c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.exe
+c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.pdb
