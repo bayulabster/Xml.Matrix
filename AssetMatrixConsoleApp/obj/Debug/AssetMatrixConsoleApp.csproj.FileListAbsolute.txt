@@ -4,3 +4,11 @@ c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp
 c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csprojResolveAssemblyReference.cache
 c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.exe
 c:\users\bayulabster\documents\visual studio 2013\Projects\AssetMatrixConsoleApp\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.pdb
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.exe.config
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.exe
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.pdb
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.exe
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.pdb
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csprojResolveAssemblyReference.cache
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.AssetsMatrixForm.resources
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csproj.GenerateResource.Cache

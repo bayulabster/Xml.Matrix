@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace AssetMatrixConsoleApp
 {
@@ -11,8 +13,19 @@ namespace AssetMatrixConsoleApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Asset matrix console app v 0.1\n");
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new AssetsMatrixForm());
+
             
+
+            // RunConsoleCommand();
+        }
+
+        private static void RunConsoleCommand()
+        {
+            Console.WriteLine("Asset matrix console app v 0.1\n");
+
             string[] xmlPath = System.IO.File.ReadAllLines("XmlPath.txt");
             string path = xmlPath[0];
             System.Console.WriteLine("Contents are retrieve from " + path);
@@ -23,8 +36,8 @@ namespace AssetMatrixConsoleApp
                 labs.Add(path + lab);
 
             string[] XPathQuery = System.IO.File.ReadAllLines("Query.txt");
-            string query = XPathQuery[0];            
-            
+            string query = XPathQuery[0];
+
             List<String> results = new List<string>();
             results.Add("\nQuery: " + query + "\n");
 
@@ -33,7 +46,7 @@ namespace AssetMatrixConsoleApp
                 XmlDocument doc = new XmlDocument();
                 doc.Load(labUrl);
                 XmlNode root = doc.DocumentElement;
-                
+
                 XmlNodeList itemNodes = doc.SelectNodes(query);
 
                 if (itemNodes.Count > 0)
