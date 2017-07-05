@@ -49,8 +49,10 @@
     <Compile Include="AssetsMatrixForm.Designer.cs">
       <DependentUpon>AssetsMatrixForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ItemDataClass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XMLParsing.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
