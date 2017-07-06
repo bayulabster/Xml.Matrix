@@ -10,5 +10,6 @@ D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.pdb
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.exe
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.pdb
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csprojResolveAssemblyReference.cache
-D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.AssetsMatrixForm.resources
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csproj.GenerateResource.Cache
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.AssetsMatrix.resources
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.Properties.Resources.resources

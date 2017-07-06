@@ -26,22 +26,29 @@ namespace AssetMatrixConsoleApp
         
     }
 
-    public partial class AssetsMatrixForm : Form
+    public partial class AssetsMatrix : Form
     {
         private SettingsItemData _SettingsData;
         private List<SimulationItemData> _SimulationItemData;
+        private BackgroundWorker _BackgroundWorker;
 
-        public AssetsMatrixForm()
+        public AssetsMatrix()
         {
             _SimulationItemData = new List<SimulationItemData>();
             InitializeComponent();
             FetchingData();
         }
-
+       
         private void FetchingData()
         {
             SettingsParsing settings = new SettingsParsing("settings.xml");
-            List<ItemDataClass> itemList = settings.ParseXML();
+            settings.StartParsing();
+            settings.xmlEvent += SettingsOnComplete;
+        }
+
+        private void SettingsOnComplete(object sender, XMLParsingEventArgs args)
+        {
+            List<ItemDataClass> itemList = args._ItemDataClass;
             _SettingsData = itemList[0] as SettingsItemData;
         }
 
@@ -49,15 +56,22 @@ namespace AssetMatrixConsoleApp
         {
             label3.Text = "Load data from server";
 
+            button2.Enabled = false;
             ElementItemDataParsing elementItemDataParsing = new ElementItemDataParsing(_SettingsData);
-            List<ItemDataClass> elementItemData = elementItemDataParsing.ParseXML();
+            elementItemDataParsing.StartParsing();
+            elementItemDataParsing.xmlEvent += ElementOnComplete;
+        }
 
+        private void ElementOnComplete(object sender, XMLParsingEventArgs args)
+        {
+            List<ItemDataClass> elementItemData = args._ItemDataClass;
             foreach (ItemDataClass element in elementItemData)
             {
                 SimulationItemData simulationData = element as SimulationItemData;
                 _SimulationItemData.Add(simulationData);
             }
 
+            button2.Enabled = true;
             label3.Text = "Data Is Ready";
         }
 

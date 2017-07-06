@@ -1,0 +1,8 @@
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Release\AssetMatrixConsoleApp.exe.config
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Release\AssetMatrixConsoleApp.exe
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Release\AssetMatrixConsoleApp.pdb
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Release\AssetMatrixConsoleApp.AssetsMatrix.resources
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Release\AssetMatrixConsoleApp.Properties.Resources.resources
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Release\AssetMatrixConsoleApp.csproj.GenerateResource.Cache
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Release\AssetMatrixConsoleApp.exe
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Release\AssetMatrixConsoleApp.pdb
