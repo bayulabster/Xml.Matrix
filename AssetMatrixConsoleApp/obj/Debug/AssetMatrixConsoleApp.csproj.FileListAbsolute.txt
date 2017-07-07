@@ -13,3 +13,7 @@ D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.cspr
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.csproj.GenerateResource.Cache
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.AssetsMatrix.resources
 D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.Properties.Resources.resources
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.exe.manifest
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\bin\Debug\AssetMatrixConsoleApp.application
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.exe.manifest
+D:\Projects\XMLMatrix\AssetMatrixConsoleApp\obj\Debug\AssetMatrixConsoleApp.application

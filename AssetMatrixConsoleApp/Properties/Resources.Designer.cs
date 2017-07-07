@@ -59,5 +59,23 @@ namespace AssetMatrixConsoleApp.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;settings&gt;
+        ///	&lt;url&gt;https://cdn.labster.com/content/simulations/release/4.1.27s160/Simulations/&lt;/url&gt;
+        ///	&lt;simulations&gt;
+        ///		&lt;simulation&gt;Engine__ModularLab_Empty.xml&lt;/simulation&gt;
+        ///		&lt;simulation&gt;Engine__SafetyLab_Empty.xml&lt;/simulation&gt;
+        ///		&lt;simulation&gt;Engine_ABL_Antibodies.xml&lt;/simulation&gt;
+        ///		&lt;simulation&gt;Engine_ACB_AcidBases.xml&lt;/simulation&gt;
+        ///		&lt;simulation&gt;Engine_ANG_AnimalGenetics.xml&lt;/simulation&gt;
+        ///		&lt;simulation&gt;Engine_BCL_BiologicalCircuit.xml&lt;/simulation&gt;
+        ///		&lt;simulation&gt;Engine_BIL_BacteriaIsolation.xml&lt;/simulati [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string settings {
+            get {
+                return ResourceManager.GetString("settings", resourceCulture);
+            }
+        }
     }
 }
