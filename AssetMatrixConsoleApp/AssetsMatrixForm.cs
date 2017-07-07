@@ -31,12 +31,19 @@ namespace AssetMatrixConsoleApp
         private SettingsItemData _SettingsData;
         private List<SimulationItemData> _SimulationItemData;
         private BackgroundWorker _BackgroundWorker;
+        private ListViewLabNameSorter _ListViewLabSorter;
 
         public AssetsMatrix()
         {
             _SimulationItemData = new List<SimulationItemData>();
             InitializeComponent();
             FetchingData();
+
+            _ListViewLabSorter = new ListViewLabNameSorter();
+            listView1.ListViewItemSorter = _ListViewLabSorter;
+            this.Cursor = Cursors.Default;
+            pictureBox2.Enabled = false;
+            pictureBox2.Visible = false;
         }
        
         private void FetchingData()
@@ -55,6 +62,9 @@ namespace AssetMatrixConsoleApp
         private void OnFetchData(object sender, EventArgs e)
         {
             label3.Text = "Load data from server";
+            this.Cursor = Cursors.WaitCursor;
+            pictureBox2.Enabled = true;
+            pictureBox2.Visible = true;
 
             button2.Enabled = false;
             ElementItemDataParsing elementItemDataParsing = new ElementItemDataParsing(_SettingsData);
@@ -72,12 +82,68 @@ namespace AssetMatrixConsoleApp
             }
 
             button2.Enabled = true;
+            pictureBox2.Enabled = false;
+            pictureBox2.Visible = false;
             label3.Text = "Data Is Ready";
+            this.Cursor = Cursors.Default;
         }
 
         private void label1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void ColumnClickHeader(object sender, ColumnClickEventArgs args)
+        {
+            if (args.Column == 0)
+                SortLabName(args);
+            else if (args.Column == 1)
+                SortCount(args);
+
+        }
+
+        private void SortLabName(ColumnClickEventArgs args)
+        {
+            if (args.Column == _ListViewLabSorter.SortColumn)
+            {
+                if (_ListViewLabSorter.Order == SortOrder.Ascending)
+                {
+                    _ListViewLabSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    _ListViewLabSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                _ListViewLabSorter.SortColumn = args.Column;
+                _ListViewLabSorter.Order = SortOrder.Ascending;
+            }
+
+            this.listView1.Sort();
+        }
+
+        private void SortCount(ColumnClickEventArgs args)
+        {
+            if(args.Column == _ListViewLabSorter.SortColumn)
+            {
+                if(_ListViewLabSorter.Order == SortOrder.Ascending)
+                {
+                    _ListViewLabSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    _ListViewLabSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                _ListViewLabSorter.SortColumn = args.Column;
+                _ListViewLabSorter.Order = SortOrder.Ascending;
+            }
+
+            this.listView1.Sort();
         }
 
         private void OnTextBoxInput(object sender, KeyEventArgs e)

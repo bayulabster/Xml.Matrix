@@ -20,7 +20,18 @@ namespace AssetMatrixConsoleApp
         }
     }
 
+    public class XMLProgressEventArgs : EventArgs
+    {
+        public int Progress { get; set; }
+
+        public XMLProgressEventArgs(int progress)
+        {
+            Progress = progress;
+        }
+    }
+
     public delegate void XMLEvent(object sender, XMLParsingEventArgs args);
+    public delegate void XMLProgressEvent(object sender, XMLProgressEventArgs args);
 
     public class XMLParsing
     {
@@ -242,9 +253,8 @@ namespace AssetMatrixConsoleApp
     public class ElementItemDataParsing : XMLParsing
     {
         private const int MAX_BATCH = 64;
-        private int threadWorkBatch = 1;
         private SettingsItemData _SettingItemData;
-
+     
         public ElementItemDataParsing(SettingsItemData settingItemData)
         {
             _SettingItemData = settingItemData;
@@ -254,7 +264,8 @@ namespace AssetMatrixConsoleApp
         protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
         {
             List<ItemDataClass> itemDataClass = new List<ItemDataClass>();
-            
+
+            BackgroundWorker worker = (BackgroundWorker)sender;
 
             int simulationCount = _SettingItemData.Simulations.Count;
             int batchCount = (simulationCount / ((MAX_BATCH))) + 1;
@@ -269,6 +280,8 @@ namespace AssetMatrixConsoleApp
                 
                 for (int j = 0; j < maxBatchCount; j++)
                 {
+                    int percentage = ((i * MAX_BATCH) + j) / simulationCount;
+                    worker.ReportProgress(percentage);
                     string xmlURL = _SettingItemData.Url + _SettingItemData.Simulations[(i * MAX_BATCH) + j];
                     Debug.WriteLine(xmlURL);
                     manualResetEvents[j] = new ManualResetEvent(false);
