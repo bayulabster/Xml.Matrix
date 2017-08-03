@@ -1,0 +1,35 @@
+﻿<Window x:Class="AssetsMatrix.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AssetsMatrix"
+        mc:Ignorable="d"
+        Title="AssetsMatrix" WindowStartupLocation="CenterScreen" Cursor="Arrow" Height="1080" Background="#FF1B1B1D" Width="1920" ResizeMode="CanMinimize">
+    <Grid Cursor="Arrow">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Image x:Name="image" HorizontalAlignment="Left" Height="100" Margin="44,23,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="65,108,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="34" Width="223" Height="54"/>
+        <Image x:Name="Labster___Copy_png" Margin="0,16,1484,926" Source="Labster - Copy.png"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="60" Margin="477,36,0,0" Text="Search By Name, GameObjectId, ElementId" VerticalAlignment="Top" Width="1012" Background="#FF292F31" BorderBrush="{x:Null}" Foreground="#FF635858" FontFamily="Segoe UI Semibold" TextWrapping="WrapWithOverflow" FontSize="36" UndoLimit="91"/>
+        <Button x:Name="button" Content="Cari" HorizontalAlignment="Left" Margin="1489,36,0,0" VerticalAlignment="Top" Width="73" Height="60" Background="#FF292F31" Foreground="White"/>
+        <Button x:Name="button1" Content="Refresh Data" HorizontalAlignment="Left" Margin="1594,36,0,0" VerticalAlignment="Top" Width="255" Height="60" Background="#FF4D6873" Foreground="White" FontSize="36"/>
+        <Image x:Name="Pasted_image_at_2017_07_11_05_30_PM__1__png" Margin="0,-22,0,0" Source="Pasted image at 2017_07_11 05_30 PM (1).png" Stretch="Fill"/>
+        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="646,246,0,0" VerticalAlignment="Top" Height="778" Width="1215" Background="#FF292F31" RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="12" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn/>
+            </DataGrid.Columns>
+            <DataGrid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleY="-0.134"/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="-0.998"/>
+                </TransformGroup>
+            </DataGrid.RenderTransform>
+        </DataGrid>
+
+    </Grid>
+</Window>
