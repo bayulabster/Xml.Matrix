@@ -57,19 +57,25 @@ namespace AssetMatrixConsoleApp
         {
             List<ItemDataClass> itemList = args._ItemDataClass;
             _SettingsData = itemList[0] as SettingsItemData;
+
+            FetchingElementData();
         }
 
-        private void OnFetchData(object sender, EventArgs e)
+        private void FetchingElementData()
         {
-            label3.Text = "Load data from server";
             this.Cursor = Cursors.WaitCursor;
             pictureBox2.Enabled = true;
             pictureBox2.Visible = true;
 
-            button2.Enabled = false;
+            searchButton.Enabled = false;
             ElementItemDataParsing elementItemDataParsing = new ElementItemDataParsing(_SettingsData);
             elementItemDataParsing.StartParsing();
             elementItemDataParsing.xmlEvent += ElementOnComplete;
+        }
+
+        private void OnFetchData(object sender, EventArgs e)
+        {
+            FetchingElementData();   
         }
 
         private void ElementOnComplete(object sender, XMLParsingEventArgs args)
@@ -81,10 +87,10 @@ namespace AssetMatrixConsoleApp
                 _SimulationItemData.Add(simulationData);
             }
 
-            button2.Enabled = true;
+            searchButton.Enabled = true;
             pictureBox2.Enabled = false;
             pictureBox2.Visible = false;
-            label3.Text = "Data Is Ready";
+            //AssetsList.Text = "Data Is Ready";
             this.Cursor = Cursors.Default;
         }
 
@@ -152,7 +158,7 @@ namespace AssetMatrixConsoleApp
 
             if(e.KeyCode == Keys.Return)
             {
-                SearchForGameObject(textBox1);
+                SearchForGameObject(InputField);
             }
         }
 
@@ -215,7 +221,7 @@ namespace AssetMatrixConsoleApp
 
         private void button2_Click(object sender, EventArgs e)
         {
-            SearchForGameObject(textBox1);
+            SearchForGameObject(InputField);
         }
     }
 }
