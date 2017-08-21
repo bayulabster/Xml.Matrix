@@ -64,6 +64,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\ItemDataClass.cs" />
+    <Compile Include="Core\ListViewElementCountSorter.cs" />
     <Compile Include="Core\XMLParsing.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -102,6 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Pasted image at 2017_07_11 05_30 PM %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ajax1-loader.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

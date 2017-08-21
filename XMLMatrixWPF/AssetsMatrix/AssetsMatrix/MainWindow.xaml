@@ -5,21 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssetsMatrix"
         mc:Ignorable="d"
-        Title="AssetsMatrix" WindowStartupLocation="CenterScreen" Cursor="Arrow" Height="1080" Background="#FF1B1B1D" Width="1920" ResizeMode="CanMinimize">
+        Title="Assets Matrix" WindowStartupLocation="CenterScreen" Cursor="Arrow" Height="720" Background="#FF1B1B1D" Width="1280" ResizeMode="CanMinimize" FontSize="20">
     <Grid Cursor="Arrow">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Image x:Name="image" HorizontalAlignment="Left" Height="100" Margin="44,23,0,0" VerticalAlignment="Top" Width="100"/>
-        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="65,108,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="34" Width="223" Height="54"/>
-        <Image x:Name="Labster___Copy_png" Margin="0,16,1484,926" Source="Labster - Copy.png"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="60" Margin="477,36,0,0" Text="Search By Name, GameObjectId, ElementId" VerticalAlignment="Top" Width="1012" Background="#FF292F31" BorderBrush="{x:Null}" Foreground="#FF635858" FontFamily="Segoe UI Semibold" TextWrapping="WrapWithOverflow" FontSize="36" UndoLimit="91"/>
-        <Button x:Name="button" Content="Cari" HorizontalAlignment="Left" Margin="1489,36,0,0" VerticalAlignment="Top" Width="73" Height="60" Background="#FF292F31" Foreground="White"/>
-        <Button x:Name="button1" Content="Refresh Data" HorizontalAlignment="Left" Margin="1594,36,0,0" VerticalAlignment="Top" Width="255" Height="60" Background="#FF4D6873" Foreground="White" FontSize="36"/>
-        <Image x:Name="Pasted_image_at_2017_07_11_05_30_PM__1__png" Margin="0,-22,0,0" Source="Pasted image at 2017_07_11 05_30 PM (1).png" Stretch="Fill"/>
-        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="646,246,0,0" VerticalAlignment="Top" Height="778" Width="1215" Background="#FF292F31" RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="12" HeadersVisibility="Column">
+        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,70,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="22" Width="155" Height="36"/>
+        <Image x:Name="Labster___Copy_png" Margin="0,16,1477,926" Source="Labster - Copy.png"/>
+        <Button x:Name="button1" Click="RefreshButtonClick" Content="Refresh Data" HorizontalAlignment="Left" Margin="1070,23,0,0" VerticalAlignment="Top" Width="165" Height="41" Background="#FF4D6873" Foreground="White" FontSize="16" BorderBrush="#FFDAD7D7"/>
+        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="408,139,0,0" VerticalAlignment="Top" Height="519" Width="832" Background="#FF292F31" RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30" Foreground="White" FontSize="12" HeadersVisibility="Column" BorderBrush="{x:Null}">
+            <DataGrid.Resources>
+                <Style TargetType="{x:Type DataGridColumnHeader}" >
+                    <Setter Property="Background" Value="#FF292F31" />
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn/>
+                <DataGridTextColumn MinWidth="300" Header="Name" Foreground="White" FontSize="36"/>
+                <DataGridTextColumn MinWidth="150" Header="Count"/>
             </DataGrid.Columns>
             <DataGrid.RenderTransform>
                 <TransformGroup>
@@ -30,6 +32,52 @@
                 </TransformGroup>
             </DataGrid.RenderTransform>
         </DataGrid>
+        <DataGrid x:Name="SimulationList" HorizontalAlignment="Left" Margin="31,139,0,0" VerticalAlignment="Top" Height="519" Width="373" Background="#FF292F31" Foreground="White" BorderBrush="#FF292626" FontSize="12">
+            <DataGrid.Resources>
+                <Style TargetType="{x:Type DataGridColumnHeader}" >
+                    <Setter Property="Background" Value="#FF292F31" />
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn MinWidth="300" Binding="{Binding Path=Name}" Header="Name" Foreground="White">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Background" Value="#FF292F31" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn MinWidth="150" Binding="{Binding Path=Count}"  Header="Count">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Background" Value="#FF292F31" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Rectangle HorizontalAlignment="Left" Height="24" Margin="31,115,0,0" VerticalAlignment="Top" Width="373">
+            <Rectangle.Fill>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF212628" Offset="0.123"/>
+                    <GradientStop Color="#FF3C3B3B"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+        <Label x:Name="label1" Content="Simulation List" HorizontalAlignment="Left" Margin="40,111,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" FontFamily="Segoe UI Semibold" Height="25" Width="104"/>
+        <Rectangle HorizontalAlignment="Left" Height="24" Margin="409,115,0,0" VerticalAlignment="Top" Width="830">
+            <Rectangle.Fill>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF212628" Offset="0.123"/>
+                    <GradientStop Color="#FF3C3B3B"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+        <Button x:Name="button" Click="CariButtonClick" Content="Cari" HorizontalAlignment="Left" Margin="998,22,0,0" VerticalAlignment="Top" Width="47" Height="42" Background="#FF292F31" Foreground="White"/>
+        <Label x:Name="label1_Copy" Content="Assets List" HorizontalAlignment="Left" Margin="411,111,0,0" VerticalAlignment="Top" Foreground="White" FontSize="16" FontFamily="Segoe UI Semibold" Height="28" Width="86"/>
+        <Image x:Name="Labster___Copy_png1" Margin="31,10,1028,611" Source="Labster - Copy.png" Stretch="Fill"/>
+        <Image x:Name="ajax1_loader_gif" Margin="585,364,561,312" Source="ajax1-loader.gif" Stretch="Fill"/>
+        <TextBox x:Name="textBox" GotFocus="textBox_GotFocus_1" KeyDown="InputBoxKeyDown"  HorizontalAlignment="Left" Height="39" Margin="310,23,0,0" Text="Search By Name, GameObjectId, ElementId" VerticalAlignment="Top" Width="688" Background="#FF292F31" BorderBrush="{x:Null}" Foreground="#FF635858" FontFamily="Segoe UI Semibold" TextWrapping="WrapWithOverflow" FontSize="16" UndoLimit="91"/>
+        <ListBox x:Name="SearchListBox" SelectionChanged="SearchListBox_SelectionChanged" Background="Gray"  HorizontalAlignment="Right" VerticalAlignment="Top" Width="688" Margin="0,67,276,0" Visibility="Collapsed"/>
 
     </Grid>
 </Window>
