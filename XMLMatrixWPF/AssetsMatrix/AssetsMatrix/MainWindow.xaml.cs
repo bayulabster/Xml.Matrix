@@ -47,6 +47,7 @@ namespace AssetsMatrix
     {
         private SettingsItemData _SettingsData;
         private List<SimulationItemData> _SimulationItemData;
+        private List<AssetsListItemData> _AssetsListItemData;
         private BackgroundWorker _BackgroundWorker;
         //private ListViewLabNameSorter _ListViewLabSorter;
 
@@ -54,7 +55,9 @@ namespace AssetsMatrix
         {
             
             _SimulationItemData = new List<SimulationItemData>();
-            FetchingData();
+            _AssetsListItemData = new List<AssetsListItemData>();
+            //FetchingData();
+            FetchingDataAssetList();
             InitializeComponent();
 
             Debug.WriteLine("main window");
@@ -82,12 +85,26 @@ namespace AssetsMatrix
             FetchingElementData();
         }
 
+        private void FetchingDataAssetList()
+        {
+            AssetsListParsing assetList = new AssetsListParsing("assetslist.xml");
+            assetList.StartParsing();
+            assetList.xmlEvent += AssetListOnComplete;
+        }
+
+        private void AssetListOnComplete(object sender, XMLParsingEventArgs args)
+        {
+            List<ItemDataClass> itemList = args._ItemDataClass;
+
+            foreach(ItemDataClass item in itemList)
+            {
+                AssetsListItemData assetsItem = item as AssetsListItemData;
+                _AssetsListItemData.Add(assetsItem);
+            }
+        }
+
         private void FetchingElementData()
         {
-            //this.Cursor = Cursors.WaitCursor;
-            //pictureBox2.Enabled = true;
-            //pictureBox2.Visible = true;
-
             ajax1_loader_gif.IsEnabled = true;
             ajax1_loader_gif.Visibility = Visibility.Visible;
 
@@ -113,9 +130,6 @@ namespace AssetsMatrix
 
             button1.IsEnabled = true;
             this.Cursor = Cursors.Arrow;
-
-            Debug.WriteLine("hallooooooooooooooooooooooooooooo");
-
             //searchButton.Enabled = true;
             //pictureBox2.Enabled = false;
             //pictureBox2.Visible = false;

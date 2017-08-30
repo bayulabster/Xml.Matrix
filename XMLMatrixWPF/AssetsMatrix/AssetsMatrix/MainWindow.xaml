@@ -72,7 +72,7 @@
                 </LinearGradientBrush>
             </Rectangle.Fill>
         </Rectangle>
-        <Button x:Name="button" Click="CariButtonClick" Content="Cari" HorizontalAlignment="Left" Margin="998,22,0,0" VerticalAlignment="Top" Width="47" Height="42" Background="#FF292F31" Foreground="White"/>
+        <Button x:Name="button" Click="CariButtonClick" Content="Search" HorizontalAlignment="Left" Margin="998,22,0,0" VerticalAlignment="Top" Width="47" Height="42" Background="#FF292F31" Foreground="White" FontSize="14"/>
         <Label x:Name="label1_Copy" Content="Assets List" HorizontalAlignment="Left" Margin="411,111,0,0" VerticalAlignment="Top" Foreground="White" FontSize="16" FontFamily="Segoe UI Semibold" Height="28" Width="86"/>
         <Image x:Name="Labster___Copy_png1" Margin="31,10,1028,611" Source="Labster - Copy.png" Stretch="Fill"/>
         <Image x:Name="ajax1_loader_gif" Margin="585,364,561,312" Source="ajax1-loader.gif" Stretch="Fill"/>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Xml;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace AssetsMatrix.Core
 {
@@ -198,6 +199,83 @@ namespace AssetsMatrix.Core
             }
 
             return itemDataClass;
+        }
+    }
+
+    public class AssetsListParsing :XMLParsing
+    {
+        private string _URL;
+
+        public AssetsListParsing(string url)
+        {
+            _URL = url;
+            Debug.WriteLine("fewifjweofjoeifewo");
+        }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            List<ItemDataClass> itemDataClass = new List<ItemDataClass>();
+
+            Debug.WriteLine("BackgroundWorker AssetsListParsing");
+            Debug.WriteLine(_URL);
+            using (XmlTextReader xmlReader = new XmlTextReader(_URL))
+            {
+                
+                while (xmlReader.Read())
+                {
+                    if(xmlReader.NodeType == XmlNodeType.Element)
+                    {
+                        if (xmlReader.Name == "row")
+                        {
+                            string gameObjectId = "";
+                            string unity3dPackName = "";
+                            string sourceId = "";
+                            string tooltip = "";
+                            string extendedTooltip = "";
+                            string type = "";
+                            string importPath = "";
+                            string automatedXML = "";
+
+                            XElement elem = XNode.ReadFrom(xmlReader) as XElement;
+                            if(elem != null)
+                            {
+                                gameObjectId = elem.Element("E").Value;
+                                unity3dPackName = elem.Element("F").Value;
+                                sourceId = elem.Element("G").Value;
+                                tooltip = elem.Element("H").Value;
+                                extendedTooltip = elem.Element("I").Value;
+                                type = elem.Element("J").Value;
+                                importPath = elem.Element("K").Value;
+                                automatedXML = elem.Element("L").Value;
+
+                            }
+                                AssetsListItemData assetItemData = new AssetsListItemData("", "", "", gameObjectId, unity3dPackName, sourceId, tooltip, extendedTooltip,
+                                                                                type, importPath, automatedXML, "", "", "", "", "", "");
+                                itemDataClass.Add(assetItemData);
+                        }
+                    }
+                }
+                
+            }
+
+            args.Result = itemDataClass;
+        }
+
+        protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if (args.Error != null)
+            {
+
+            }
+            else if (args.Cancelled)
+            {
+
+            }
+            else
+            {
+                List<ItemDataClass> itemDataList = args.Result as List<ItemDataClass>;
+                OnXMLEvent(itemDataList);
+            }
         }
     }
 
