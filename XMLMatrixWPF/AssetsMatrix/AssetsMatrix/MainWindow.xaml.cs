@@ -9,6 +9,7 @@ using System.Windows.Input;
 using AssetsMatrix.Core;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 
 namespace AssetsMatrix
@@ -49,6 +50,8 @@ namespace AssetsMatrix
         private List<SimulationItemData> _SimulationItemData;
         private List<AssetsListItemData> _AssetsListItemData;
         private BackgroundWorker _BackgroundWorker;
+        public ObservableCollection<AssetsListObjects> _AssetsListObjects;
+        
         //private ListViewLabNameSorter _ListViewLabSorter;
 
         public MainWindow()
@@ -56,6 +59,7 @@ namespace AssetsMatrix
             
             _SimulationItemData = new List<SimulationItemData>();
             _AssetsListItemData = new List<AssetsListItemData>();
+            _AssetsListObjects = new ObservableCollection<AssetsListObjects>();
             //FetchingData();
             FetchingDataAssetList();
             InitializeComponent();
@@ -130,10 +134,7 @@ namespace AssetsMatrix
 
             button1.IsEnabled = true;
             this.Cursor = Cursors.Arrow;
-            //searchButton.Enabled = true;
-            //pictureBox2.Enabled = false;
-            //pictureBox2.Visible = false;
-            //this.Cursor = Cursors.Default;
+          
         }
 
         private void RefreshButtonClick(object sender, RoutedEventArgs e)
@@ -148,7 +149,7 @@ namespace AssetsMatrix
             if(e.Key == Key.Return)
             {
                 SimulationList.Items.Clear();
-                SearchForGameObject(textBox);
+                //SearchForGameObject(textBox);
             }
 
         }
@@ -156,7 +157,7 @@ namespace AssetsMatrix
         private void CariButtonClick(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Cari Button Clicked");
-            SearchForGameObject(textBox);
+            //SearchForGameObject(textBox);
         }
 
         private void textBox_GotFocus_1(object sender, RoutedEventArgs e)
@@ -165,13 +166,13 @@ namespace AssetsMatrix
             Debug.WriteLine("got Focused text box");
         }
 
-        private void SearchForGameObject(TextBox textbox)
+        private void SearchForGameObject(string value)
         {
             SimulationList.Items.Clear();
             SimulationList.ItemsSource = null;
-            TextBox textObj = textbox;
-            string textboxString = textObj.Text.ToLower();
-            Debug.WriteLine(" the keyword is :: " + textObj.Text.ToLower());
+           
+            string textboxString = value.ToLower();
+            Debug.WriteLine(" the keyword is :: " + value.ToLower());
             string[] simulationArray = new string[_SimulationItemData.Count];
             List<SimulationStruct> simulationStructArray = new List<SimulationStruct>();
 
@@ -219,8 +220,6 @@ namespace AssetsMatrix
                 SimulationList.Items.Add(new SimulationListObject(simulation.Name, simulation.ElementCount.ToString()));
             }
 
-            textObj.Text = "";
-           
         }
 
         private void SearchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
