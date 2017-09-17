@@ -50,7 +50,8 @@ namespace AssetsMatrix
         private List<SimulationItemData> _SimulationItemData;
         private List<AssetsListItemData> _AssetsListItemData;
         private BackgroundWorker _BackgroundWorker;
-        public ObservableCollection<AssetsListObjects> _AssetsListObjects;
+        public ObservableCollection<AssetsListObjects> AssetsListObjects;
+        public ObservableCollection<SimulationListObject> _SimulationListObjects;
         
         //private ListViewLabNameSorter _ListViewLabSorter;
 
@@ -59,8 +60,10 @@ namespace AssetsMatrix
             
             _SimulationItemData = new List<SimulationItemData>();
             _AssetsListItemData = new List<AssetsListItemData>();
-            _AssetsListObjects = new ObservableCollection<AssetsListObjects>();
-            //FetchingData();
+            AssetsListObjects = new ObservableCollection<AssetsListObjects>();
+            _SimulationListObjects = new ObservableCollection<SimulationListObject>();
+
+            FetchingData();
             FetchingDataAssetList();
             InitializeComponent();
 
@@ -70,6 +73,8 @@ namespace AssetsMatrix
             ajax1_loader_gif.Visibility = Visibility.Hidden;
             this.Cursor = Cursors.AppStarting;
             textBox.TextChanged += new TextChangedEventHandler(textBox_TextChanged);
+
+            AssetsListGrid.ItemsSource = AssetsListObjects;
         }
 
         private void FetchingData()
@@ -149,6 +154,7 @@ namespace AssetsMatrix
             if(e.Key == Key.Return)
             {
                 SimulationList.Items.Clear();
+                SearchForAssets(textBox.Text);
                 //SearchForGameObject(textBox);
             }
 
@@ -157,6 +163,7 @@ namespace AssetsMatrix
         private void CariButtonClick(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Cari Button Clicked");
+            SearchForAssets(textBox.Text);
             //SearchForGameObject(textBox);
         }
 
@@ -166,10 +173,25 @@ namespace AssetsMatrix
             Debug.WriteLine("got Focused text box");
         }
 
+        private void SearchForAssets(string value)
+        {
+            AssetsListObjects.Clear();
+            string toLowerCase = value.ToLower();
+
+            for(int i = 0; i < _AssetsListItemData.Count; i++)
+            {
+                string sourceIdLower = _AssetsListItemData[i].SourceId.ToLower();
+
+                if(sourceIdLower.Contains(toLowerCase))
+                {
+                    AssetsListItemData assetObject = _AssetsListItemData[i];
+                    AssetsListObjects.Add(new AssetsListObjects("", assetObject.GameObjectid, assetObject.Unity3DPackName, assetObject.SourceId, assetObject.Tooltip, assetObject.ExtendedTooltip, assetObject.ImportPath));
+                }
+            }
+        }
+
         private void SearchForGameObject(string value)
         {
-            SimulationList.Items.Clear();
-            SimulationList.ItemsSource = null;
            
             string textboxString = value.ToLower();
             Debug.WriteLine(" the keyword is :: " + value.ToLower());
@@ -212,13 +234,15 @@ namespace AssetsMatrix
                 }
             }
 
-            foreach (SimulationStruct simulation in simulationStructArray)
-            {
-                string[] valueArray = new string[2];
-                valueArray[0] = simulation.Name;
-                valueArray[1] = simulation.ElementCount.ToString();
-                SimulationList.Items.Add(new SimulationListObject(simulation.Name, simulation.ElementCount.ToString()));
-            }
+            
+
+            //foreach (SimulationStruct simulation in simulationStructArray)
+            //{
+            //    string[] valueArray = new string[2];
+            //    valueArray[0] = simulation.Name;
+            //    valueArray[1] = simulation.ElementCount.ToString();
+            //    SimulationList.Items.Add(new SimulationListObject(simulation.Name, simulation.ElementCount.ToString()));
+            //}
 
         }
 
@@ -238,39 +262,54 @@ namespace AssetsMatrix
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string typedText = textBox.Text;
-            List<string> autoList = new List<string>();
-            autoList.Clear();
 
-            foreach(SimulationItemData simulation in _SimulationItemData)
+            //List<string> autoList = new List<string>();
+            //autoList.Clear();
+
+            //foreach(SimulationItemData simulation in _SimulationItemData)
+            //{
+            //    foreach(string element in simulation.GetElementList)
+            //    {
+            //        if(!string.IsNullOrEmpty(textBox.Text))
+            //        {
+            //            if(element.StartsWith(textBox.Text) && !autoList.Contains(element))
+            //            {
+            //                autoList.Add(element);
+            //            }
+            //        }
+            //    }
+            //}
+
+
+            AssetsListObjects.Clear();
+            foreach(AssetsListItemData assetObj in _AssetsListItemData)
             {
-                foreach(string element in simulation.GetElementList)
+               if(!string.IsNullOrEmpty(textBox.Text))
                 {
-                    if(!string.IsNullOrEmpty(textBox.Text))
+                    string lowerCaseTextBox = textBox.Text.ToLower();
+                    string assetObjLowerCase = assetObj.SourceId.ToLower();
+                    if(assetObjLowerCase.StartsWith(lowerCaseTextBox))
                     {
-                        if(element.StartsWith(textBox.Text) && !autoList.Contains(element))
-                        {
-                            autoList.Add(element);
-                        }
+                        AssetsListObjects.Add(new AssetsListObjects("", assetObj.GameObjectid, assetObj.Unity3DPackName, assetObj.SourceId, assetObj.Tooltip, assetObj.ExtendedTooltip, assetObj.ImportPath));
                     }
                 }
             }
 
-            if(autoList.Count > 0)
-            {
-                SearchListBox.ItemsSource = autoList;
-                SearchListBox.Visibility = Visibility.Visible;
-            }
-            else if(textBox.Text.Equals(""))
-            {
-                SearchListBox.Visibility = Visibility.Collapsed;
-                SearchListBox.ItemsSource = null;
-            }
-            else
-            {
-                SearchListBox.Visibility = Visibility.Collapsed;
-                SearchListBox.ItemsSource = null;
-            }
+            //if(autoList.Count > 0)
+            //{
+            //    SearchListBox.ItemsSource = autoList;
+            //    SearchListBox.Visibility = Visibility.Visible;
+            //}
+            //else if(textBox.Text.Equals(""))
+            //{
+            //    SearchListBox.Visibility = Visibility.Collapsed;
+            //    SearchListBox.ItemsSource = null;
+            //}
+            //else
+            //{
+            //    SearchListBox.Visibility = Visibility.Collapsed;
+            //    SearchListBox.ItemsSource = null;
+            //}
         }
     }
 }

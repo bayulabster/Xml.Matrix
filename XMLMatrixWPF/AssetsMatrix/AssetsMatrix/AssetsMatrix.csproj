@@ -66,6 +66,7 @@
     <Compile Include="Core\AssetsListObjects.cs" />
     <Compile Include="Core\ItemDataClass.cs" />
     <Compile Include="Core\ListViewElementCountSorter.cs" />
+    <Compile Include="Core\SimulationListObject.cs" />
     <Compile Include="Core\XMLParsing.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

@@ -13,16 +13,21 @@
         <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,70,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="22" Width="155" Height="36"/>
         <Image x:Name="Labster___Copy_png" Margin="0,16,1477,926" Source="Labster - Copy.png"/>
         <Button x:Name="button1" Click="RefreshButtonClick" Content="Refresh Data" HorizontalAlignment="Left" Margin="1070,23,0,0" VerticalAlignment="Top" Width="165" Height="41" Background="#FF4D6873" Foreground="White" FontSize="16" BorderBrush="#FFDAD7D7"/>
-        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="30,139,0,0" VerticalAlignment="Top" Height="519" Width="832" Background="#FF292F31" RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30" Foreground="White" FontSize="12" HeadersVisibility="Column" BorderBrush="{x:Null}" ItemsSource="{Binding _AssetsListObjects}" >
+        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="30,139,0,0" Background="Black" VerticalAlignment="Top" Height="519" Width="832"  RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30" Foreground="Black" FontSize="12" HeadersVisibility="Column" BorderBrush="{x:Null}" IsReadOnly="True">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}" >
                     <Setter Property="Background" Value="#FF292F31" />
                 </Style>
             </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn MinWidth="300" Header="Name" Foreground="White" FontSize="36"/>
-                <DataGridTextColumn MinWidth="150" Header="Count"/>
-            </DataGrid.Columns>
+            <!--<DataGrid.Columns>
+                <DataGridTextColumn MinWidth="80" Header="ImageURL" Foreground="Red" FontSize="36"/>
+                <DataGridTextColumn MinWidth="150" Header="GameObjectId"/>
+                <DataGridTextColumn MinWidth="150" Header="Unity3DPackName"/>
+                <DataGridTextColumn MinWidth="150" Header="SourceId"/>
+                <DataGridTextColumn MinWidth="150" Header="ToolTip"/>
+                <DataGridTextColumn MinWidth="150" Header="ExtendedTooltip"/>
+                <DataGridTextColumn MinWidth="150" Header="ImportPath"/>
+            </DataGrid.Columns>-->
             <DataGrid.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -32,7 +37,7 @@
                 </TransformGroup>
             </DataGrid.RenderTransform>
         </DataGrid>
-        <DataGrid x:Name="SimulationList" HorizontalAlignment="Left" Margin="866,139,0,0" VerticalAlignment="Top" Height="516" Width="373" Background="#FF292F31" Foreground="White" BorderBrush="#FF292626" FontSize="12">
+        <DataGrid x:Name="SimulationList" HorizontalAlignment="Left" Margin="866,139,0,0" VerticalAlignment="Top" Height="516" Width="373" Background="#FF292F31" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding _SimulationListObjects}" IsReadOnly="True">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}" >
                     <Setter Property="Background" Value="#FF292F31" />
