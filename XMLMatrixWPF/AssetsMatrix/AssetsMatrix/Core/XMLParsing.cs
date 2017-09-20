@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Xml;
 using System.Diagnostics;
 using System.Xml.Linq;
+using System.Net;
 
 namespace AssetsMatrix.Core
 {
@@ -308,6 +309,11 @@ namespace AssetsMatrix.Core
 
             using (XmlTextReader xmlReader = new XmlTextReader(xmlURL))
             {
+                try
+                {
+
+                
+                
                 while (xmlReader.Read())
                 {
                     if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Element")
@@ -319,6 +325,11 @@ namespace AssetsMatrix.Core
                             elementList.Add(sourceId);
                         }
                     }
+                }
+                }
+                catch(WebException e)
+                {
+                    Debug.WriteLine(e.ToString());
                 }
             }
 

@@ -10,24 +10,43 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,70,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="22" Width="155" Height="36"/>
+        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="210,22,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="22" Width="155" Height="36"/>
         <Image x:Name="Labster___Copy_png" Margin="0,16,1477,926" Source="Labster - Copy.png"/>
-        <Button x:Name="button1" Click="RefreshButtonClick" Content="Refresh Data" HorizontalAlignment="Left" Margin="1070,23,0,0" VerticalAlignment="Top" Width="165" Height="41" Background="#FF4D6873" Foreground="White" FontSize="16" BorderBrush="#FFDAD7D7"/>
-        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="30,139,0,0" Background="Black" VerticalAlignment="Top" Height="519" Width="832"  RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30" Foreground="Black" FontSize="12" HeadersVisibility="Column" BorderBrush="{x:Null}" IsReadOnly="True">
+        <Button x:Name="button1" Click="RefreshButtonClick" Content="Refresh Data" HorizontalAlignment="Left" Margin="1113,22,0,0" VerticalAlignment="Top" Width="126" Height="41" Background="#FF4D6873" Foreground="White" FontSize="16" BorderBrush="#FFDAD7D7"/>
+        
+        <DataGrid x:Name="AssetsListGrid" HorizontalAlignment="Left" Margin="30,103,0,0" Background="Black" VerticalAlignment="Top" Height="555" Width="832"  RenderTransformOrigin="0.5,0.5" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30" Foreground="Black" FontSize="12" HeadersVisibility="Column" BorderBrush="{x:Null}" IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding}" MouseDoubleClick="AssetsListGrid_MouseDoubleClick">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}" >
                     <Setter Property="Background" Value="#FF292F31" />
+                    <Setter Property="Foreground" Value="White" />
+                </Style>
+                <Style TargetType="{x:Type DataGridCell}" >
+                    <Setter Property="Background" Value="#FF292F31" />
+                    <Setter Property="MaxHeight" Value="50" />
+                    <Setter Property="Foreground" Value="White" />
                 </Style>
             </DataGrid.Resources>
-            <!--<DataGrid.Columns>
-                <DataGridTextColumn MinWidth="80" Header="ImageURL" Foreground="Red" FontSize="36"/>
-                <DataGridTextColumn MinWidth="150" Header="GameObjectId"/>
-                <DataGridTextColumn MinWidth="150" Header="Unity3DPackName"/>
-                <DataGridTextColumn MinWidth="150" Header="SourceId"/>
-                <DataGridTextColumn MinWidth="150" Header="ToolTip"/>
-                <DataGridTextColumn MinWidth="150" Header="ExtendedTooltip"/>
-                <DataGridTextColumn MinWidth="150" Header="ImportPath"/>
-            </DataGrid.Columns>-->
+            <DataGrid.Columns>
+                <DataGridTemplateColumn MinWidth="80" Header="Image URL">
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="White" />
+                            <Setter Property="MaxHeight" Value="50" />
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding ImageFilepath}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn MinWidth="150" Header="Game Object Id" Binding="{Binding GameObjectId}"/>
+                <DataGridTextColumn MinWidth="150" Header="Unity 3D Pack Name" Binding="{Binding Unity3DPackName}"/>
+                <DataGridTextColumn MinWidth="150" Header="Source Id" Binding="{Binding SourceId}"/>
+                <DataGridTextColumn MinWidth="150" Header="ToolTip" Binding="{Binding ToolTip}"/>
+                <DataGridTextColumn MinWidth="150" Header="Extended Tooltip" Binding="{Binding ExtendedTooltip}"/>
+                <DataGridTextColumn MinWidth="150" Header="Import Path" Binding="{Binding ImportPath}"/>
+            </DataGrid.Columns>
             <DataGrid.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -37,10 +56,17 @@
                 </TransformGroup>
             </DataGrid.RenderTransform>
         </DataGrid>
-        <DataGrid x:Name="SimulationList" HorizontalAlignment="Left" Margin="866,139,0,0" VerticalAlignment="Top" Height="516" Width="373" Background="#FF292F31" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding _SimulationListObjects}" IsReadOnly="True">
+        
+        <DataGrid x:Name="SimulationList" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30"  HorizontalAlignment="Left" Margin="866,102,0,0" VerticalAlignment="Top" Height="553" Width="373" Background="Black" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding}" IsReadOnly="True">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}" >
                     <Setter Property="Background" Value="#FF292F31" />
+                    <Setter Property="Foreground" Value="White" />
+                </Style>
+                <Style TargetType="{x:Type DataGridCell}" >
+                    <Setter Property="Background" Value="#FF292F31" />
+                    <Setter Property="MaxHeight" Value="20" />
+                    <Setter Property="Foreground" Value="White" />
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
@@ -60,7 +86,7 @@
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Rectangle HorizontalAlignment="Left" Height="24" Margin="866,115,0,0" VerticalAlignment="Top" Width="373">
+        <Rectangle HorizontalAlignment="Left" Height="24" Margin="866,73,0,0" VerticalAlignment="Top" Width="373">
             <Rectangle.Fill>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FF212628" Offset="0.123"/>
@@ -68,8 +94,8 @@
                 </LinearGradientBrush>
             </Rectangle.Fill>
         </Rectangle>
-        <Label x:Name="label1" Content="Simulation List" HorizontalAlignment="Left" Margin="875,111,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" FontFamily="Segoe UI Semibold" Height="25" Width="104"/>
-        <Rectangle HorizontalAlignment="Left" Height="24" Margin="31,115,0,0" VerticalAlignment="Top" Width="830">
+        <Label x:Name="label1" Content="Simulation List" HorizontalAlignment="Left" Margin="875,72,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" FontFamily="Segoe UI Semibold" Height="25" Width="104"/>
+        <Rectangle HorizontalAlignment="Left" Height="24" Margin="31,73,0,0" VerticalAlignment="Top" Width="830">
             <Rectangle.Fill>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FF212628" Offset="0.123"/>
@@ -77,11 +103,10 @@
                 </LinearGradientBrush>
             </Rectangle.Fill>
         </Rectangle>
-        <Button x:Name="button" Click="CariButtonClick" Content="Search" HorizontalAlignment="Left" Margin="998,22,0,0" VerticalAlignment="Top" Width="47" Height="42" Background="#FF292F31" Foreground="White" FontSize="14"/>
-        <Label x:Name="label1_Copy" Content="Assets List" HorizontalAlignment="Left" Margin="33,111,0,0" VerticalAlignment="Top" Foreground="White" FontSize="16" FontFamily="Segoe UI Semibold" Height="28" Width="86"/>
-        <Image x:Name="Labster___Copy_png1" Margin="31,10,1028,611" Source="Labster - Copy.png" Stretch="Fill"/>
+        <Label x:Name="label1_Copy" Content="Assets List" HorizontalAlignment="Left" Margin="33,69,0,0" VerticalAlignment="Top" Foreground="White" FontSize="16" FontFamily="Segoe UI Semibold" Height="28" Width="86"/>
+        <Image x:Name="Labster___Copy_png1" Margin="31,10,1064,623" Source="Labster - Copy.png" Stretch="Fill"/>
         <Image x:Name="ajax1_loader_gif" Margin="585,364,561,312" Source="ajax1-loader.gif" Stretch="Fill"/>
-        <TextBox x:Name="textBox" GotFocus="textBox_GotFocus_1" KeyDown="InputBoxKeyDown"  HorizontalAlignment="Left" Height="39" Margin="310,23,0,0" Text="Search By Name, GameObjectId, ElementId" VerticalAlignment="Top" Width="688" Background="#FF292F31" BorderBrush="{x:Null}" Foreground="#FF635858" FontFamily="Segoe UI Semibold" TextWrapping="WrapWithOverflow" FontSize="16" UndoLimit="91"/>
+        <TextBox x:Name="textBox" GotFocus="textBox_GotFocus_1" KeyDown="InputBoxKeyDown"  HorizontalAlignment="Left" Height="39" Margin="350,19,0,0" Text="Search By Name, GameObjectId, ElementId" VerticalAlignment="Top" Width="758" Background="#FF292F31" BorderBrush="{x:Null}" Foreground="#FF635858" FontFamily="Segoe UI Semibold" TextWrapping="WrapWithOverflow" FontSize="16" UndoLimit="91"/>
         <ListBox x:Name="SearchListBox" SelectionChanged="SearchListBox_SelectionChanged" Background="Gray"  HorizontalAlignment="Right" VerticalAlignment="Top" Width="688" Margin="0,67,276,0" Visibility="Collapsed"/>
 
     </Grid>

@@ -46,21 +46,21 @@ namespace AssetsMatrix
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string IMAGE_FILEPATH = "http://labsterim.s3.amazonaws.com/media/labimages/PrefabData/";
+
         private SettingsItemData _SettingsData;
         private List<SimulationItemData> _SimulationItemData;
         private List<AssetsListItemData> _AssetsListItemData;
         private BackgroundWorker _BackgroundWorker;
-        public ObservableCollection<AssetsListObjects> AssetsListObjects;
+        public ObservableCollection<AssetsListObjects> AssetLists;
         public ObservableCollection<SimulationListObject> _SimulationListObjects;
-        
-        //private ListViewLabNameSorter _ListViewLabSorter;
 
         public MainWindow()
         {
             
             _SimulationItemData = new List<SimulationItemData>();
             _AssetsListItemData = new List<AssetsListItemData>();
-            AssetsListObjects = new ObservableCollection<AssetsListObjects>();
+            AssetLists = new ObservableCollection<AssetsListObjects>();
             _SimulationListObjects = new ObservableCollection<SimulationListObject>();
 
             FetchingData();
@@ -74,7 +74,10 @@ namespace AssetsMatrix
             this.Cursor = Cursors.AppStarting;
             textBox.TextChanged += new TextChangedEventHandler(textBox_TextChanged);
 
-            AssetsListGrid.ItemsSource = AssetsListObjects;
+
+
+            AssetsListGrid.DataContext = AssetLists;
+            SimulationList.DataContext = _SimulationListObjects;
         }
 
         private void FetchingData()
@@ -150,12 +153,9 @@ namespace AssetsMatrix
 
         private void InputBoxKeyDown(object sender, KeyEventArgs e)
         {
-            Debug.WriteLine("Input Cari text box" + e.Key.ToString());
-            if(e.Key == Key.Return)
+            if(string.IsNullOrEmpty(textBox.Text))
             {
-                SimulationList.Items.Clear();
-                SearchForAssets(textBox.Text);
-                //SearchForGameObject(textBox);
+                _SimulationListObjects.Clear();
             }
 
         }
@@ -164,7 +164,6 @@ namespace AssetsMatrix
         {
             Debug.WriteLine("Cari Button Clicked");
             SearchForAssets(textBox.Text);
-            //SearchForGameObject(textBox);
         }
 
         private void textBox_GotFocus_1(object sender, RoutedEventArgs e)
@@ -175,24 +174,26 @@ namespace AssetsMatrix
 
         private void SearchForAssets(string value)
         {
-            AssetsListObjects.Clear();
-            string toLowerCase = value.ToLower();
+            //AssetLists.Clear();
+            //string toLowerCase = value.ToLower();
 
-            for(int i = 0; i < _AssetsListItemData.Count; i++)
-            {
-                string sourceIdLower = _AssetsListItemData[i].SourceId.ToLower();
+            //for(int i = 0; i < _AssetsListItemData.Count; i++)
+            //{
+            //    string sourceIdLower = _AssetsListItemData[i].SourceId.ToLower();
 
-                if(sourceIdLower.Contains(toLowerCase))
-                {
-                    AssetsListItemData assetObject = _AssetsListItemData[i];
-                    AssetsListObjects.Add(new AssetsListObjects("", assetObject.GameObjectid, assetObject.Unity3DPackName, assetObject.SourceId, assetObject.Tooltip, assetObject.ExtendedTooltip, assetObject.ImportPath));
-                }
-            }
+            //    if(sourceIdLower.Contains(toLowerCase))
+            //    {
+            //        AssetsListItemData assetObject = _AssetsListItemData[i];
+            //        string UriLink = IMAGE_FILEPATH + assetObject.Unity3DPackName + "/" + assetObject.SourceId + ".png";
+            //        Debug.WriteLine("okokokokokokok :: "+UriLink);
+            //        AssetLists.Add(new AssetsListObjects(UriLink, assetObject.GameObjectid, assetObject.Unity3DPackName, assetObject.SourceId, assetObject.Tooltip, assetObject.ExtendedTooltip, assetObject.ImportPath));
+            //    }
+            //}
         }
 
         private void SearchForGameObject(string value)
         {
-           
+            _SimulationListObjects.Clear();
             string textboxString = value.ToLower();
             Debug.WriteLine(" the keyword is :: " + value.ToLower());
             string[] simulationArray = new string[_SimulationItemData.Count];
@@ -234,16 +235,14 @@ namespace AssetsMatrix
                 }
             }
 
+            foreach(SimulationStruct simulation in simulationStructArray)
+            {
+                string[] valueArray = new string[2];
+                valueArray[0] = simulation.Name;
+                valueArray[1] = simulation.ElementCount.ToString();
+                _SimulationListObjects.Add(new SimulationListObject(simulation.Name, simulation.ElementCount.ToString()));
+            }
             
-
-            //foreach (SimulationStruct simulation in simulationStructArray)
-            //{
-            //    string[] valueArray = new string[2];
-            //    valueArray[0] = simulation.Name;
-            //    valueArray[1] = simulation.ElementCount.ToString();
-            //    SimulationList.Items.Add(new SimulationListObject(simulation.Name, simulation.ElementCount.ToString()));
-            //}
-
         }
 
         private void SearchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -263,53 +262,28 @@ namespace AssetsMatrix
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
-            //List<string> autoList = new List<string>();
-            //autoList.Clear();
-
-            //foreach(SimulationItemData simulation in _SimulationItemData)
-            //{
-            //    foreach(string element in simulation.GetElementList)
-            //    {
-            //        if(!string.IsNullOrEmpty(textBox.Text))
-            //        {
-            //            if(element.StartsWith(textBox.Text) && !autoList.Contains(element))
-            //            {
-            //                autoList.Add(element);
-            //            }
-            //        }
-            //    }
-            //}
-
-
-            AssetsListObjects.Clear();
+            AssetLists.Clear();
             foreach(AssetsListItemData assetObj in _AssetsListItemData)
             {
                if(!string.IsNullOrEmpty(textBox.Text))
                 {
                     string lowerCaseTextBox = textBox.Text.ToLower();
                     string assetObjLowerCase = assetObj.SourceId.ToLower();
-                    if(assetObjLowerCase.StartsWith(lowerCaseTextBox))
+                    string UriLink = IMAGE_FILEPATH + assetObj.Unity3DPackName + "/" + assetObj.SourceId + ".png";
+                    if (assetObjLowerCase.StartsWith(lowerCaseTextBox))
                     {
-                        AssetsListObjects.Add(new AssetsListObjects("", assetObj.GameObjectid, assetObj.Unity3DPackName, assetObj.SourceId, assetObj.Tooltip, assetObj.ExtendedTooltip, assetObj.ImportPath));
+                        AssetLists.Add(new AssetsListObjects(UriLink, assetObj.GameObjectid, assetObj.Unity3DPackName, assetObj.SourceId, assetObj.Tooltip, assetObj.ExtendedTooltip, assetObj.ImportPath));
                     }
                 }
             }
 
-            //if(autoList.Count > 0)
-            //{
-            //    SearchListBox.ItemsSource = autoList;
-            //    SearchListBox.Visibility = Visibility.Visible;
-            //}
-            //else if(textBox.Text.Equals(""))
-            //{
-            //    SearchListBox.Visibility = Visibility.Collapsed;
-            //    SearchListBox.ItemsSource = null;
-            //}
-            //else
-            //{
-            //    SearchListBox.Visibility = Visibility.Collapsed;
-            //    SearchListBox.ItemsSource = null;
-            //}
+        }
+
+        private void AssetsListGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid row = (DataGrid)sender;
+            AssetsListObjects asset = row.SelectedItem as AssetsListObjects;
+            SearchForGameObject(asset.SourceId);
         }
     }
 }

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace AssetsMatrix.Core
 {
     public class AssetsListObjects : IEditableCollectionView
     {
-        public string ImageURL { get; set; }
+        public Uri ImageFilepath { get; set; }
         public string GameObjectId { get; set; }
         public string Unity3DPackName { get; set; }
         public string SourceId { get; set; }
@@ -15,9 +16,13 @@ namespace AssetsMatrix.Core
         public string ExtendedTooltip { get; set; }
         public string ImportPath { get; set; }
 
-        public AssetsListObjects(string imageURL, string gameObjectId, string unity3DPackName, string sourceId, string tooltip, string extendedTooltip, string importPath)
+        public AssetsListObjects(string imageURL, string gameObjectId, string unity3DPackName, string sourceId, string tooltip, string extendedTooltip, string importPath) : base()
         {
-            ImageURL = ImageURL;
+
+            if (!string.IsNullOrEmpty(imageURL))
+            {
+                ImageFilepath = new Uri(imageURL);
+            }
             GameObjectId = gameObjectId;
             Unity3DPackName = unity3DPackName;
             SourceId = sourceId;
