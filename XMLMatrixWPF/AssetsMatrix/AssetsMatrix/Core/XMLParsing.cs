@@ -7,13 +7,15 @@ using System.Xml;
 using System.Diagnostics;
 using System.Xml.Linq;
 using System.Net;
+using Octokit;
+
 
 namespace AssetsMatrix.Core
 {
     public class XMLParsingEventArgs : EventArgs
     {
         public List<ItemDataClass> _ItemDataClass { get; set; }
-
+        
         public XMLParsingEventArgs(List<ItemDataClass> itemDataClass)
         {
             _ItemDataClass = itemDataClass;
@@ -107,6 +109,103 @@ namespace AssetsMatrix.Core
             return null;
         }
 
+    }
+
+    public class GithubAssetListDataParsing :XMLParsing
+    {
+        private GitHubClient _Client;
+
+        public GithubAssetListDataParsing(GitHubClient client)
+        {
+            _Client = client;
+        }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            GetAssetDataAsync(args);
+            base.BackgroundWorkerDoWork(sender, args);
+        }
+
+        private async Task GetAssetDataAsync(DoWorkEventArgs args)
+        {
+            List<string> AssetDataList = await GetDataFromGithub(_Client);
+
+            args.Result = AssetDataList;
+        }
+
+        private async Task<List<string>> GetDataFromGithub(GitHubClient client)
+        {
+            var file = await client.Repository.Content.GetAllContentsByRef("Livit", "Labster.Art.Lab", "Common.txt", "2017.2");
+
+            string returnedString = "";
+            foreach (var f in file)
+            {
+                returnedString = f.Content;
+            }
+
+            List<String> ListOfAssets = GetAllAssetsFromGithubText(returnedString);
+
+            return ListOfAssets;
+        }
+
+        private List<String> GetAllAssetsFromGithubText(string value)
+        {
+            List<String> returnedString = new List<string>();
+
+            string returnValue = value;
+            string[] stringArray = returnValue.Split('\n');
+            foreach (string s in stringArray)
+            {
+                returnedString.Add(extractString(s));
+            }
+
+            return returnedString;
+        }
+
+        private string extractString(string s)
+        {
+            string extractedStringAsset = TrimString(s);
+            int idx = extractedStringAsset.IndexOf('.');
+            string sRemove = extractedStringAsset.Remove(idx);
+
+            return sRemove;
+        }
+
+        private string TrimString(string s)
+        {
+            string sTrim = ReverseString(s);
+            if (s == null) return null;
+            int idx = sTrim.IndexOf('/');
+            string sRemove = sTrim.Remove(idx);
+            string sResult = ReverseString(sRemove);
+
+            return sResult;
+        }
+
+        private string ReverseString(string s)
+        {
+            if (s == null) return null;
+            char[] charS = s.ToCharArray();
+            Array.Reverse(charS);
+            return new string(charS);
+        }
+      
+        protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if(args.Error != null)
+            {
+
+            }
+            else
+            {
+                List<ItemDataClass> itemDataList = args.Result as List<ItemDataClass>;
+                OnXMLEvent(itemDataList);
+            }
+
+            base.BackgroundWorkerRunWorkerCompleted(sender, args);
+        }
+
+        
     }
 
     public class SettingsParsing : XMLParsing

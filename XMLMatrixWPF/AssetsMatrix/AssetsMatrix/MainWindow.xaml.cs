@@ -10,6 +10,7 @@ using AssetsMatrix.Core;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using Octokit;
 
 
 namespace AssetsMatrix
@@ -58,10 +59,13 @@ namespace AssetsMatrix
         public MainWindow()
         {
             
+            
             _SimulationItemData = new List<SimulationItemData>();
             _AssetsListItemData = new List<AssetsListItemData>();
             AssetLists = new ObservableCollection<AssetsListObjects>();
             _SimulationListObjects = new ObservableCollection<SimulationListObject>();
+
+           
 
             FetchingData();
             FetchingDataAssetList();
@@ -79,6 +83,25 @@ namespace AssetsMatrix
             AssetsListGrid.DataContext = AssetLists;
             SimulationList.DataContext = _SimulationListObjects;
         }
+
+        private GitHubClient AuthenticateGithub()
+        {
+            GitHubClient client = new GitHubClient(new ProductHeaderValue("mirsabayu-labster"));
+            Credentials tokenOuth = new Credentials("0d47ff8c735bc7b3e6b704fa9eb504eeb76034be");
+
+            return client;
+        }
+
+        private void GithubFetchingDataForSimulation()
+        {
+
+        }
+
+        private void GithubFetchingDataForAssetDataList()
+        {
+
+        }
+
 
         private void FetchingData()
         {
