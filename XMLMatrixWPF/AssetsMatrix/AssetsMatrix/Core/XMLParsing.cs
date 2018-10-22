@@ -34,7 +34,8 @@ namespace AssetsMatrix.Core
 
     public delegate void XMLEvent(object sender, XMLParsingEventArgs args);
     public delegate void XMLProgressEvent(object sender, XMLProgressEventArgs args);
-
+    
+        
     public class XMLParsing
     {
         protected BackgroundWorker _BackgroundWorker;
@@ -111,35 +112,57 @@ namespace AssetsMatrix.Core
 
     }
 
-    public class GithubAssetListDataParsing :XMLParsing
-    {
-        private GitHubClient _Client;
+    #region GITHUB
 
-        public GithubAssetListDataParsing(GitHubClient client)
+    public abstract class GithubDataParsingBase : XMLParsing
+    {
+        protected GitHubClient _Client;
+        protected string _BranchName;
+        protected string _RepoName;
+        public const string GITHUB_REPO_OWNER = "Livit";
+
+        public GithubDataParsingBase(GitHubClient client, string repoName, string branchName  )
         {
             _Client = client;
+            _RepoName = repoName;
+            _BranchName = branchName;
         }
+
+    }
+
+    public class GithubAssetListDataParsing :GithubDataParsingBase
+    {
+
+        public GithubAssetListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
 
         protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
         {
-            List<string> AssetDataList = GetDataFromGithub(_Client).Result;
-
-            List<ItemDataClass> AssetDataClassList = new List<ItemDataClass>();
-
-            foreach (string s in AssetDataList)
+            try
             {
-                var assetData = new GithubAssetDataClass(s);
-                AssetDataClassList.Add(assetData);
+                List<string> AssetDataList = GetAssetDataFromGithub(_Client).Result;
+
+                List<ItemDataClass> AssetDataClassList = new List<ItemDataClass>();
+
+                foreach (string s in AssetDataList)
+                {
+                    var assetData = new GithubAssetDataClass(s);
+                    AssetDataClassList.Add(assetData);
+                }
+
+                args.Result = AssetDataClassList;
+
+                base.BackgroundWorkerDoWork(sender, args);
             }
+            catch(Exception e)
+            {
 
-            args.Result = AssetDataClassList;
-
-            base.BackgroundWorkerDoWork(sender, args);
+            }
+            
         }
 
-        private async Task<List<string>> GetDataFromGithub(GitHubClient client)
+        private async Task<List<string>> GetAssetDataFromGithub(GitHubClient client)
         {
-            var file = await client.Repository.Content.GetAllContentsByRef("Livit", "Labster.Art.Lab", "Common.txt", "2017.2");
+            var file = await client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Common.txt", _BranchName);
 
             string returnedString = "";
             foreach (var f in file)
@@ -163,38 +186,10 @@ namespace AssetsMatrix.Core
             {
                 if(s.Length>0)
                 {
-                    returnedString.Add(extractString(s));
+                    returnedString.Add(AssetMatrixStaticFunction.ExtractStringFromPath(s));
                 }
             }
             return returnedString;
-        }
-
-        private string extractString(string s)
-        {
-            string extractedStringAsset = TrimString(s);
-            int idx = extractedStringAsset.IndexOf('.');
-            string sRemove = extractedStringAsset.Remove(idx);
-
-            return sRemove;
-        }
-
-        private string TrimString(string s)
-        {
-            string sTrim = ReverseString(s);
-            if (s == null) return null;
-            int idx = sTrim.IndexOf('/');
-            string sRemove = sTrim.Remove(idx);
-            string sResult = ReverseString(sRemove);
-
-            return sResult;
-        }
-
-        private string ReverseString(string s)
-        {
-            if (s == null) return null;
-            char[] charS = s.ToCharArray();
-            Array.Reverse(charS);
-            return new string(charS);
         }
 
         protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
@@ -212,6 +207,117 @@ namespace AssetsMatrix.Core
         }
         
     }
+
+    public class GithubSimulationListDataParsing : GithubDataParsingBase
+    {
+        private const int MAX_BATCH = 64;
+
+        public GithubSimulationListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            base.BackgroundWorkerDoWork(sender, args);
+
+            try
+            {
+                
+                BackgroundWorker worker = (BackgroundWorker)sender;
+                ProcessGithubSimulationData(worker, args);
+
+                
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+            
+        }
+
+        private void ProcessGithubSimulationData(BackgroundWorker worker, DoWorkEventArgs args)
+        {
+            try
+            {
+                List<ItemDataClass> itemDataClass = new List<ItemDataClass>();
+                List<GithubSimulationDataURL> simulationsList =  GetSimulationDataFromGithub().Result;
+                int simulationsCount = simulationsList.Count;
+                int batchCount = (simulationsCount / ((MAX_BATCH))) + 1;
+                Debug.WriteLine(batchCount + " :: " + simulationsCount);
+                for (int i = 0; i < batchCount; i++)
+                {
+                    int modCount = (simulationsCount % MAX_BATCH);
+                    int maxBatchCount = (i + 1) * MAX_BATCH < simulationsCount ? MAX_BATCH : modCount;
+
+                    ManualResetEvent[] manualResetEvents = new ManualResetEvent[maxBatchCount];
+                    SimulationThread[] simulationThreads = new SimulationThread[maxBatchCount];
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        int percentage = ((i * MAX_BATCH) + j) / simulationsCount;
+                        worker.ReportProgress(percentage);
+                        manualResetEvents[j] = new ManualResetEvent(false);
+                        SimulationThread simulationThread = new SimulationThread(j, simulationsList[(i * MAX_BATCH) + j].SimulationName, simulationsList[(i * MAX_BATCH) + j].XMLURL, manualResetEvents[j]);
+                        simulationThreads[j] = simulationThread;
+                        ThreadPool.QueueUserWorkItem(simulationThreads[j].ThreadPoolCallback, j);
+                    }
+
+                    WaitHandle.WaitAll(manualResetEvents);
+                    Debug.WriteLine("All Calculation are complete....");
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        SimulationThread simulationThread = simulationThreads[j];
+                        List<string> elementList = simulationThread.ElementList;
+                        string simulationName = simulationThread.SimulationName;
+
+                        SimulationItemData simulationData = new SimulationItemData(simulationName, elementList);
+                        itemDataClass.Add(simulationData);
+                    }
+
+                }
+
+                args.Result = itemDataClass;
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine("Process Simulation Error :: " + e.Message + " : " + e.StackTrace);
+            }
+           
+        }
+
+        private async Task<List<GithubSimulationDataURL>>  GetSimulationDataFromGithub()
+        {
+            
+            var files = await _Client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Simulations", _BranchName);
+
+            List<GithubSimulationDataURL> githubList = new List<GithubSimulationDataURL>();
+            foreach(var file in files)
+            {
+                if(file.Name.Contains("Engine"))
+                {
+                    githubList.Add(new GithubSimulationDataURL(file.DownloadUrl, file.Name));
+                }
+            }
+
+            return githubList;
+        }
+
+        protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if (args.Error != null)
+            {
+
+            }
+            else
+            {
+                List<ItemDataClass> itemDataList = args.Result as List<ItemDataClass>;
+                OnXMLEvent(itemDataList);
+            }
+        }
+    }
+
+    #endregion
+
+    #region WEB_URL
 
     public class SettingsParsing : XMLParsing
     {
@@ -420,11 +526,11 @@ namespace AssetsMatrix.Core
                 
                 while (xmlReader.Read())
                 {
-                    if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Element")
+                    if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Asset")
                     {
-                        if (xmlReader.GetAttribute("SourceId") != "" && xmlReader.GetAttribute("SourceId") != null)
+                        if (xmlReader.GetAttribute("") != "" && xmlReader.GetAttribute("AssetPath") != null)
                         {
-                            string sourceId = xmlReader.GetAttribute("SourceId").ToLower();
+                            string sourceId = xmlReader.GetAttribute("AssetPath").ToLower();
                             Debug.WriteLine(sourceId);
                             elementList.Add(sourceId);
                         }
@@ -524,4 +630,6 @@ namespace AssetsMatrix.Core
             }
         }
     }
+
+    #endregion
 }

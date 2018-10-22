@@ -52,85 +52,118 @@ namespace AssetsMatrix
         private SettingsItemData _SettingsData;
         private List<SimulationItemData> _SimulationItemData;
         private List<AssetsListItemData> _AssetsListItemData;
+        private List<GithubAssetDataClass> _AssetListItemDataGithub;
         private BackgroundWorker _BackgroundWorker;
         public ObservableCollection<AssetsListObjects> AssetLists;
         public ObservableCollection<SimulationListObject> _SimulationListObjects;
 
+        private const string USERNAME = "mirsabayu-labster";
+        private const string CREDENTIALS = "dec6c70b2748ab68b74b08153a06854df259d067";
+
         public MainWindow()
         {
-            
-            
-            _SimulationItemData = new List<SimulationItemData>();
-            _AssetsListItemData = new List<AssetsListItemData>();
+            InitializeComponent();
             AssetLists = new ObservableCollection<AssetsListObjects>();
             _SimulationListObjects = new ObservableCollection<SimulationListObject>();
-
-
+#if WEB_URL
+            _SimulationItemData = new List<SimulationItemData>();
+            _AssetsListItemData = new List<AssetsListItemData>();
+          
 
             //FetchingData();
             //FetchingDataAssetList();
+          
+#elif GITHUB
+            _AssetListItemDataGithub = new List<GithubAssetDataClass>();
 
             GithubFetchingDataForAssetDataList();
-            //AuthenticateGithub
-            //TryingGettingData();
-
-            //InitializeComponent();
-
-            //Debug.WriteLine("main window");
-
-            //ajax1_loader_gif.IsEnabled = false;
-            //ajax1_loader_gif.Visibility = Visibility.Hidden;
-            //this.Cursor = Cursors.AppStarting;
-            //textBox.TextChanged += new TextChangedEventHandler(textBox_TextChanged);
+            GithubFetchingDataForSimulation();
+#endif
+            SetLoading(false);
 
 
-
-            //AssetsListGrid.DataContext = AssetLists;
-            //SimulationList.DataContext = _SimulationListObjects;
+            AssetsListGrid.DataContext = AssetLists;
+            SimulationList.DataContext = _SimulationListObjects;
         }
 
-        private GitHubClient AuthenticateGithub()
+        private void SetLoading(bool value)
         {
-            GitHubClient client = new GitHubClient(new ProductHeaderValue("mirsabayu-labster"));
-            Credentials tokenOuth = new Credentials("dec6c70b2748ab68b74b08153a06854df259d067");
+            if (value)
+            {
+                ajax1_loader_gif.IsEnabled = true;
+                ajax1_loader_gif.Visibility = Visibility.Visible;
+
+                button1.IsEnabled = false;
+                this.Cursor = Cursors.Wait;
+            }
+            else
+            {
+                ajax1_loader_gif.IsEnabled = false;
+                ajax1_loader_gif.Visibility = Visibility.Hidden;
+                this.Cursor = Cursors.AppStarting;
+                textBox.TextChanged += new TextChangedEventHandler(textBox_TextChanged);
+            }
+        }
+
+        private GitHubClient AuthenticateGithub(string username, string credentials)
+        {
+            GitHubClient client = new GitHubClient(new ProductHeaderValue(username));
+            Credentials tokenOuth = new Credentials(credentials);
             client.Credentials = tokenOuth;
 
             return client;
         }
 
-        private async void TryingGettingData()
-        {
-            GitHubClient client = AuthenticateGithub();
-            var Repo = await client.Repository.GetAllForCurrent();
-           
-           foreach(Repository iss in Repo)
-            {
-                //Console.WriteLine(iss.FullName);
-            }
-        }
-
-      
         private void GithubFetchingDataForSimulation()
         {
+            SetLoading(true);
 
+            string repoName = "Labster.Simulations";
+            string branchName = "master";
+
+            GithubSimulationListDataParsing githubParsing = new GithubSimulationListDataParsing(AuthenticateGithub(USERNAME, CREDENTIALS), repoName, branchName);
+            githubParsing.StartParsing();
+            githubParsing.xmlEvent += OnGithubFetchingSimulationDataCompleted;
+        }
+
+        private void OnGithubFetchingSimulationDataCompleted(object sender, XMLParsingEventArgs args)
+        {
+            Debug.WriteLine("Fetching Simulation Data Completed");
         }
 
         private void GithubFetchingDataForAssetDataList()
         {
-            GithubAssetListDataParsing githubParsing = new GithubAssetListDataParsing(AuthenticateGithub());
+            SetLoading(true);
+
+            string repoName = "Labster.Art.Lab";
+            string branchName = "2017.2"; 
+
+            GithubAssetListDataParsing githubParsing = new GithubAssetListDataParsing(AuthenticateGithub(USERNAME, CREDENTIALS),repoName, branchName);
             githubParsing.StartParsing();
             githubParsing.xmlEvent += OnGithubFetchingDataComplete;
         }
 
         private void OnGithubFetchingDataComplete(object sender, XMLParsingEventArgs args)
         {
-           foreach(ItemDataClass data in args._ItemDataClass)
-            {
-                GithubAssetDataClass assetData = data as GithubAssetDataClass;
-                Console.Write(assetData.Content);
-            }
-        }
+            _AssetListItemDataGithub.Clear();
 
+            try
+            {
+                foreach (ItemDataClass data in args._ItemDataClass)
+                {
+                    GithubAssetDataClass assetData = data as GithubAssetDataClass;
+                    _AssetListItemDataGithub.Add(assetData);
+                }
+            }catch(Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+            }
+           
+
+            SetLoading(false);
+        }
+        
+        #region WEB_URL
 
         private void FetchingData()
         {
@@ -197,6 +230,8 @@ namespace AssetsMatrix
           
         }
 
+        #endregion
+
         private void RefreshButtonClick(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Refresh Button Click");
@@ -226,21 +261,35 @@ namespace AssetsMatrix
 
         private void SearchForAssets(string value)
         {
-            //AssetLists.Clear();
-            //string toLowerCase = value.ToLower();
+            AssetLists.Clear();
+            string toLowerCase = value.ToLower();
 
-            //for(int i = 0; i < _AssetsListItemData.Count; i++)
-            //{
-            //    string sourceIdLower = _AssetsListItemData[i].SourceId.ToLower();
+#if WEB_URL
+            for (int i = 0; i < _AssetsListItemData.Count; i++)
+            {
+                string sourceIdLower = _AssetsListItemData[i].SourceId.ToLower();
 
-            //    if(sourceIdLower.Contains(toLowerCase))
-            //    {
-            //        AssetsListItemData assetObject = _AssetsListItemData[i];
-            //        string UriLink = IMAGE_FILEPATH + assetObject.Unity3DPackName + "/" + assetObject.SourceId + ".png";
-            //        Debug.WriteLine("okokokokokokok :: "+UriLink);
-            //        AssetLists.Add(new AssetsListObjects(UriLink, assetObject.GameObjectid, assetObject.Unity3DPackName, assetObject.SourceId, assetObject.Tooltip, assetObject.ExtendedTooltip, assetObject.ImportPath));
-            //    }
-            //}
+                if (sourceIdLower.Contains(toLowerCase))
+                {
+                    AssetsListItemData assetObject = _AssetsListItemData[i];
+                    string UriLink = IMAGE_FILEPATH + assetObject.Unity3DPackName + "/" + assetObject.SourceId + ".png";
+                    Debug.WriteLine("okokokokokokok :: " + UriLink);
+                    AssetLists.Add(new AssetsListObjects(UriLink, assetObject.GameObjectid, assetObject.Unity3DPackName, assetObject.SourceId, assetObject.Tooltip, assetObject.ExtendedTooltip, assetObject.ImportPath));
+                }
+            }
+
+#elif GITHUB
+            for (int i = 0; i < _AssetListItemDataGithub.Count; i++)
+            {
+                string sourceIdLower = _AssetListItemDataGithub[i].Content.ToLower();
+
+                if (sourceIdLower.Contains(toLowerCase))
+                {
+                    GithubAssetDataClass assetObject = _AssetListItemDataGithub[i];
+                    AssetLists.Add(new AssetsListObjects("", assetObject.Content, assetObject.Content, assetObject.Content, "", "", ""));
+                }
+            }
+#endif
         }
 
         private void SearchForGameObject(string value)
@@ -315,9 +364,11 @@ namespace AssetsMatrix
         {
 
             AssetLists.Clear();
-            foreach(AssetsListItemData assetObj in _AssetsListItemData)
+#if WEB_URL
+            foreach (AssetsListItemData assetObj in _AssetsListItemData)
             {
-               if(!string.IsNullOrEmpty(textBox.Text))
+
+            if (!string.IsNullOrEmpty(textBox.Text))
                 {
                     string lowerCaseTextBox = textBox.Text.ToLower();
                     string assetObjLowerCase = assetObj.SourceId.ToLower();
@@ -328,6 +379,21 @@ namespace AssetsMatrix
                     }
                 }
             }
+#elif GITHUB
+            foreach (GithubAssetDataClass assetObj in _AssetListItemDataGithub)
+            {
+
+                if (!string.IsNullOrEmpty(textBox.Text))
+                {
+                    string lowerCaseTextBox = textBox.Text.ToLower();
+                    string assetObjLowerCase = assetObj.Content.ToLower();
+                    if (assetObjLowerCase.StartsWith(lowerCaseTextBox))
+                    {
+                        AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
+                    }
+                }
+            }
+#endif
 
         }
 

@@ -17,6 +17,31 @@ namespace AssetsMatrix.Core
         }
     }
 
+    public class GithubSimulationDataClass : ItemDataClass
+    {
+        public string XMLURL { get; private set; }
+        public string XMLName { get; private set; }
+        public List<string> ElementList { get; private set; }
+
+        public GithubSimulationDataClass(string xmlname, List<string> elementList)
+        {
+            XMLName = xmlname;
+            ElementList = elementList;
+        }
+    }
+
+    public class GithubSimulationDataURL : ItemDataClass
+    {
+        public string XMLURL { get; private set; }
+        public string SimulationName { get; private set; }
+
+        public GithubSimulationDataURL(string xmlURL, string simulationName)
+        {
+            XMLURL = xmlURL;
+            SimulationName = simulationName;
+        }
+    }
+
     public class AssetsListItemData: ItemDataClass
     {
         public string ScreenShot { get; private set; }
