@@ -122,15 +122,19 @@ namespace AssetsMatrix.Core
 
         protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
         {
-            GetAssetDataAsync(args);
+            List<string> AssetDataList = GetDataFromGithub(_Client).Result;
+
+            List<ItemDataClass> AssetDataClassList = new List<ItemDataClass>();
+
+            foreach (string s in AssetDataList)
+            {
+                var assetData = new GithubAssetDataClass(s);
+                AssetDataClassList.Add(assetData);
+            }
+
+            args.Result = AssetDataClassList;
+
             base.BackgroundWorkerDoWork(sender, args);
-        }
-
-        private async Task GetAssetDataAsync(DoWorkEventArgs args)
-        {
-            List<string> AssetDataList = await GetDataFromGithub(_Client);
-
-            args.Result = AssetDataList;
         }
 
         private async Task<List<string>> GetDataFromGithub(GitHubClient client)
@@ -142,6 +146,7 @@ namespace AssetsMatrix.Core
             {
                 returnedString = f.Content;
             }
+
 
             List<String> ListOfAssets = GetAllAssetsFromGithubText(returnedString);
 
@@ -156,9 +161,11 @@ namespace AssetsMatrix.Core
             string[] stringArray = returnValue.Split('\n');
             foreach (string s in stringArray)
             {
-                returnedString.Add(extractString(s));
+                if(s.Length>0)
+                {
+                    returnedString.Add(extractString(s));
+                }
             }
-
             return returnedString;
         }
 
@@ -189,10 +196,10 @@ namespace AssetsMatrix.Core
             Array.Reverse(charS);
             return new string(charS);
         }
-      
+
         protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
         {
-            if(args.Error != null)
+            if (args.Error != null)
             {
 
             }
@@ -202,9 +209,7 @@ namespace AssetsMatrix.Core
                 OnXMLEvent(itemDataList);
             }
 
-            base.BackgroundWorkerRunWorkerCompleted(sender, args);
         }
-
         
     }
 

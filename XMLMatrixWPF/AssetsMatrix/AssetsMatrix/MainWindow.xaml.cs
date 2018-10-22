@@ -65,33 +65,51 @@ namespace AssetsMatrix
             AssetLists = new ObservableCollection<AssetsListObjects>();
             _SimulationListObjects = new ObservableCollection<SimulationListObject>();
 
-           
-
-            FetchingData();
-            FetchingDataAssetList();
-            InitializeComponent();
-
-            Debug.WriteLine("main window");
-
-            ajax1_loader_gif.IsEnabled = false;
-            ajax1_loader_gif.Visibility = Visibility.Hidden;
-            this.Cursor = Cursors.AppStarting;
-            textBox.TextChanged += new TextChangedEventHandler(textBox_TextChanged);
 
 
+            //FetchingData();
+            //FetchingDataAssetList();
 
-            AssetsListGrid.DataContext = AssetLists;
-            SimulationList.DataContext = _SimulationListObjects;
+            GithubFetchingDataForAssetDataList();
+            //AuthenticateGithub
+            //TryingGettingData();
+
+            //InitializeComponent();
+
+            //Debug.WriteLine("main window");
+
+            //ajax1_loader_gif.IsEnabled = false;
+            //ajax1_loader_gif.Visibility = Visibility.Hidden;
+            //this.Cursor = Cursors.AppStarting;
+            //textBox.TextChanged += new TextChangedEventHandler(textBox_TextChanged);
+
+
+
+            //AssetsListGrid.DataContext = AssetLists;
+            //SimulationList.DataContext = _SimulationListObjects;
         }
 
         private GitHubClient AuthenticateGithub()
         {
             GitHubClient client = new GitHubClient(new ProductHeaderValue("mirsabayu-labster"));
-            Credentials tokenOuth = new Credentials("0d47ff8c735bc7b3e6b704fa9eb504eeb76034be");
+            Credentials tokenOuth = new Credentials("dec6c70b2748ab68b74b08153a06854df259d067");
+            client.Credentials = tokenOuth;
 
             return client;
         }
 
+        private async void TryingGettingData()
+        {
+            GitHubClient client = AuthenticateGithub();
+            var Repo = await client.Repository.GetAllForCurrent();
+           
+           foreach(Repository iss in Repo)
+            {
+                //Console.WriteLine(iss.FullName);
+            }
+        }
+
+      
         private void GithubFetchingDataForSimulation()
         {
 
@@ -99,7 +117,18 @@ namespace AssetsMatrix
 
         private void GithubFetchingDataForAssetDataList()
         {
+            GithubAssetListDataParsing githubParsing = new GithubAssetListDataParsing(AuthenticateGithub());
+            githubParsing.StartParsing();
+            githubParsing.xmlEvent += OnGithubFetchingDataComplete;
+        }
 
+        private void OnGithubFetchingDataComplete(object sender, XMLParsingEventArgs args)
+        {
+           foreach(ItemDataClass data in args._ItemDataClass)
+            {
+                GithubAssetDataClass assetData = data as GithubAssetDataClass;
+                Console.Write(assetData.Content);
+            }
         }
 
 
