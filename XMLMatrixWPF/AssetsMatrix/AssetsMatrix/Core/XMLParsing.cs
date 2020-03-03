@@ -7,13 +7,15 @@ using System.Xml;
 using System.Diagnostics;
 using System.Xml.Linq;
 using System.Net;
+using Octokit;
+
 
 namespace AssetsMatrix.Core
 {
     public class XMLParsingEventArgs : EventArgs
     {
         public List<ItemDataClass> _ItemDataClass { get; set; }
-
+        
         public XMLParsingEventArgs(List<ItemDataClass> itemDataClass)
         {
             _ItemDataClass = itemDataClass;
@@ -32,7 +34,8 @@ namespace AssetsMatrix.Core
 
     public delegate void XMLEvent(object sender, XMLParsingEventArgs args);
     public delegate void XMLProgressEvent(object sender, XMLProgressEventArgs args);
-
+    
+        
     public class XMLParsing
     {
         protected BackgroundWorker _BackgroundWorker;
@@ -108,6 +111,402 @@ namespace AssetsMatrix.Core
         }
 
     }
+
+    #region GITHUB
+
+    public abstract class GithubDataParsingBase : XMLParsing
+    {
+        protected GitHubClient _Client;
+        protected string _BranchName;
+        protected string _RepoName;
+        public const string GITHUB_REPO_OWNER = "Livit";
+
+        public GithubDataParsingBase(GitHubClient client, string repoName, string branchName  )
+        {
+            _Client = client;
+            _RepoName = repoName;
+            _BranchName = branchName;
+        }
+
+        protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if (args.Error != null)
+            {
+
+            }
+            else
+            {
+                List<ItemDataClass> itemDataList = args.Result as List<ItemDataClass>;
+                OnXMLEvent(itemDataList);
+            }
+
+        }
+
+    }
+
+    public class GithubAssetListDataParsing :GithubDataParsingBase
+    {
+
+        public GithubAssetListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            try
+            {
+                List<string> AssetDataList = GetAssetDataFromGithub(_Client).Result;
+
+                List<ItemDataClass> AssetDataClassList = new List<ItemDataClass>();
+
+                foreach (string s in AssetDataList)
+                {
+                    var assetData = new GithubAssetDataClass(s);
+                    AssetDataClassList.Add(assetData);
+                }
+
+                args.Result = AssetDataClassList;
+
+                base.BackgroundWorkerDoWork(sender, args);
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine("GithubAssetListDataParsing_BackroundWorkerDoWork :: " + e.Message + " : " + e.StackTrace);
+            }
+            
+        }
+
+        private async Task<List<string>> GetAssetDataFromGithub(GitHubClient client)
+        {
+            var file = await client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Common.txt", _BranchName);
+
+            string returnedString = "";
+            foreach (var f in file)
+            {
+                returnedString = f.Content;
+            }
+
+
+            List<String> ListOfAssets = GetAllAssetsFromGithubText(returnedString);
+
+            return ListOfAssets;
+        }
+
+        private List<String> GetAllAssetsFromGithubText(string value)
+        {
+            List<String> returnedString = new List<string>();
+
+            string returnValue = value;
+            string[] stringArray = returnValue.Split('\n');
+            foreach (string s in stringArray)
+            {
+                if(s.Length>0)
+                {
+                    returnedString.Add(AssetMatrixStaticFunction.ExtractStringFromPath(s));
+                }
+            }
+            return returnedString;
+        }
+
+        
+        
+    }
+
+    public class GithubSimulationListDataParsing : GithubDataParsingBase
+    {
+        private const int MAX_BATCH = 64;
+
+        public GithubSimulationListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            base.BackgroundWorkerDoWork(sender, args);
+
+            try
+            {
+                
+                BackgroundWorker worker = (BackgroundWorker)sender;
+                ProcessGithubSimulationData(worker, args);
+
+                
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("GithubSimulationListDataparsing_BackroundWorkerDoWork :: "+ e.Message + " : "+ e.StackTrace);
+            }
+            
+        }
+
+        private void ProcessGithubSimulationData(BackgroundWorker worker, DoWorkEventArgs args)
+        {
+            try
+            {
+                List<ItemDataClass> itemDataClass = new List<ItemDataClass>();
+                List<GithubSimulationDataURL> simulationsList =  GetSimulationDataFromGithub().Result;
+                int simulationsCount = simulationsList.Count;
+                int batchCount = (simulationsCount / ((MAX_BATCH))) + 1;
+                Debug.WriteLine(batchCount + " :: " + simulationsCount);
+                for (int i = 0; i < batchCount; i++)
+                {
+                    int modCount = (simulationsCount % MAX_BATCH);
+                    int maxBatchCount = (i + 1) * MAX_BATCH < simulationsCount ? MAX_BATCH : modCount;
+
+                    ManualResetEvent[] manualResetEvents = new ManualResetEvent[maxBatchCount];
+                    SimulationThread[] simulationThreads = new SimulationThread[maxBatchCount];
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        int percentage = ((i * MAX_BATCH) + j) / simulationsCount;
+                        worker.ReportProgress(percentage);
+                        manualResetEvents[j] = new ManualResetEvent(false);
+                        SimulationThread simulationThread = new SimulationThread(j, simulationsList[(i * MAX_BATCH) + j].SimulationName, simulationsList[(i * MAX_BATCH) + j].XMLURL, manualResetEvents[j]);
+                        simulationThreads[j] = simulationThread;
+                        ThreadPool.QueueUserWorkItem(simulationThreads[j].ThreadPoolCallback, j);
+                    }
+
+                    WaitHandle.WaitAll(manualResetEvents);
+                    Debug.WriteLine("All Calculation are complete....");
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        SimulationThread simulationThread = simulationThreads[j];
+                        List<string> elementList = simulationThread.ElementList;
+                        string simulationName = simulationThread.SimulationName;
+
+                        SimulationItemData simulationData = new SimulationItemData(simulationName, elementList);
+                        itemDataClass.Add(simulationData);
+                    }
+
+                }
+
+                args.Result = itemDataClass;
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine("Process Simulation Error :: " + e.Message + " : " + e.StackTrace);
+            }
+           
+        }
+
+        private async Task<List<GithubSimulationDataURL>>  GetSimulationDataFromGithub()
+        {
+            
+            var files = await _Client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Simulations", _BranchName);
+
+            List<GithubSimulationDataURL> githubList = new List<GithubSimulationDataURL>();
+            foreach(var file in files)
+            {
+                if(file.Name.Contains("Engine"))
+                {
+                    githubList.Add(new GithubSimulationDataURL(file.DownloadUrl, file.Name));
+                }
+            }
+
+            return githubList;
+        }
+
+        protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if (args.Error != null)
+            {
+
+            }
+            else
+            {
+                List<ItemDataClass> itemDataList = args.Result as List<ItemDataClass>;
+                OnXMLEvent(itemDataList);
+            }
+        }
+    }
+
+    public class GithubAssetDetailDataParsing:GithubDataParsingBase
+    {
+        private string _xmlName;
+        private const int MAX_BATCH = 32;
+
+        public GithubAssetDetailDataParsing(GitHubClient client, string repoName, string branchName, string xmlname) : base(client, repoName, branchName) {
+
+            _xmlName = xmlname;
+
+        }
+
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            try
+            {
+                BackgroundWorker worker = (BackgroundWorker)sender;
+
+                List<ItemDataClass> itemDataClass = new List<ItemDataClass>();
+                List<GithubAssetDetailData> assetDetailsList = GetAssetDetailsData(_Client).Result;
+                int assetdetailCount = assetDetailsList.Count;
+
+                if (assetdetailCount <= 0) return;
+                int batchCount = (assetdetailCount / ((MAX_BATCH))) + 1;
+                Debug.WriteLine(batchCount + " :: " + assetdetailCount);
+                for (int i = 0; i < batchCount; i++)
+                {
+                    int modCount = (assetdetailCount % MAX_BATCH);
+                    int maxBatchCount = (i + 1) * MAX_BATCH < assetdetailCount ? MAX_BATCH : modCount;
+
+                    ManualResetEvent[] manualResetEvents = new ManualResetEvent[maxBatchCount];
+                    AssetDetailDataThread[] assetThread = new AssetDetailDataThread[maxBatchCount];
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        int percentage = ((i * MAX_BATCH) + j) / assetdetailCount;
+                        worker.ReportProgress(percentage);
+                        manualResetEvents[j] = new ManualResetEvent(false);
+                        AssetDetailDataThread simulationThread = new AssetDetailDataThread(j, assetDetailsList[(i * MAX_BATCH) + j].assetName, assetDetailsList[(i * MAX_BATCH) + j].xmlURL, manualResetEvents[j]);
+                        assetThread[j] = simulationThread;
+                        ThreadPool.QueueUserWorkItem(assetThread[j].ThreadPoolCallback, j);
+                    }
+
+                    WaitHandle.WaitAll(manualResetEvents);
+                    Debug.WriteLine("All Calculation are complete....");
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        AssetDetailDataThread asset = assetThread[j];
+                        Dictionary<string, string> content = asset.Content;
+                        string assetName = asset.AssetName;
+
+                        GithubAssetDetailData assetData = new GithubAssetDetailData();
+                        assetData.assetName = assetName;
+                        assetData.AssetContentString = content;
+                        
+                        itemDataClass.Add(assetData);
+                    }
+
+                    args.Result = itemDataClass;
+                }
+
+                base.BackgroundWorkerDoWork(sender, args);
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine("error in asset details :: " + e.Message + "\n" + e.StackTrace);
+            }
+
+            
+
+            
+        }
+
+        private async Task<List<GithubAssetDetailData>> GetAssetDetailsData(GitHubClient client)
+        {
+            List<GithubAssetDetailData> listData = new List<GithubAssetDetailData>();
+
+            var files = await client.Repository.Content.GetAllContents(GITHUB_REPO_OWNER, _RepoName);
+
+            foreach(var file in files)
+            {
+                if(file.Name.Contains(".xml"))
+                {
+                    GithubAssetDetailData data = new GithubAssetDetailData();
+                    data.assetName = file.Name;
+                    data.xmlURL = file.DownloadUrl;
+
+                    listData.Add(data);
+                }
+            }
+
+            return listData;
+        }
+
+       
+    }
+
+    public class GithubAssetDetailTemplateDataParsing : GithubDataParsingBase
+    {
+        private const int MAX_BATCH = 64;
+
+        public GithubAssetDetailTemplateDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName)
+        {
+
+
+        }
+
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            try
+            {
+                BackgroundWorker worker = (BackgroundWorker)sender;
+
+                List<ItemDataClass> itemDataClass = new List<ItemDataClass>();
+                List<GithubAssetDetailTemplateUrl> assetDetailsList = GetAssetTemplateData(_Client).Result;
+                int assetdetailCount = assetDetailsList.Count;
+
+                if (assetdetailCount <= 0) return;
+                int batchCount = (assetdetailCount / ((MAX_BATCH))) + 1;
+                Debug.WriteLine(batchCount + " :: " + assetdetailCount);
+                for (int i = 0; i < batchCount; i++)
+                {
+                    int modCount = (assetdetailCount % MAX_BATCH);
+                    int maxBatchCount = (i + 1) * MAX_BATCH < assetdetailCount ? MAX_BATCH : modCount;
+
+                    ManualResetEvent[] manualResetEvents = new ManualResetEvent[maxBatchCount];
+                    AssetDetailTemplateThread[] assetThread = new AssetDetailTemplateThread[maxBatchCount];
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        int percentage = ((i * MAX_BATCH) + j) / assetdetailCount;
+                        worker.ReportProgress(percentage);
+                        manualResetEvents[j] = new ManualResetEvent(false);
+                        AssetDetailTemplateThread simulationThread = new AssetDetailTemplateThread(j, assetDetailsList[(i * MAX_BATCH) + j].XMLName, assetDetailsList[(i * MAX_BATCH) + j].XMLURL, manualResetEvents[j]);
+                        assetThread[j] = simulationThread;
+                        ThreadPool.QueueUserWorkItem(assetThread[j].ThreadPoolCallback, j);
+                    }
+
+                    WaitHandle.WaitAll(manualResetEvents);
+                    Debug.WriteLine("All Calculation are complete....");
+
+                    for (int j = 0; j < maxBatchCount; j++)
+                    {
+                        AssetDetailTemplateThread asset = assetThread[j];
+                        itemDataClass.Add(asset.Content);
+                    }
+
+                 
+                }
+
+                args.Result = itemDataClass;
+
+                base.BackgroundWorkerDoWork(sender, args);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("error in asset details template :: " + e.Message + "\n" + e.StackTrace);
+            }
+
+
+
+
+        }
+
+        private async Task<List<GithubAssetDetailTemplateUrl>> GetAssetTemplateData(GitHubClient client)
+        {
+            List<GithubAssetDetailTemplateUrl> listData = new List<GithubAssetDetailTemplateUrl>();
+
+            var files = await client.Repository.Content.GetAllContents(GITHUB_REPO_OWNER, _RepoName);
+
+            foreach (var file in files)
+            {
+                if (file.Name.Contains(".xml"))
+                {
+                    GithubAssetDetailTemplateUrl data = new GithubAssetDetailTemplateUrl(file.Name, file.DownloadUrl);
+                    listData.Add(data);
+                }
+            }
+
+            return listData;
+        }
+
+
+    }
+
+    #endregion
+
+    #region WEB_URL
 
     public class SettingsParsing : XMLParsing
     {
@@ -311,29 +710,160 @@ namespace AssetsMatrix.Core
             {
                 try
                 {
-
-                
-                
-                while (xmlReader.Read())
-                {
-                    if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Element")
+                    while (xmlReader.Read())
                     {
-                        if (xmlReader.GetAttribute("SourceId") != "" && xmlReader.GetAttribute("SourceId") != null)
+                        if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Element")
                         {
-                            string sourceId = xmlReader.GetAttribute("SourceId").ToLower();
-                            Debug.WriteLine(sourceId);
-                            elementList.Add(sourceId);
+                            if (xmlReader.GetAttribute("SourceId") != "" && xmlReader.GetAttribute("SourceId") != null)
+                            {
+                                string sourceId = xmlReader.GetAttribute("SourceId").ToLower();
+                                elementList.Add(sourceId);
+                            }
                         }
                     }
                 }
-                }
-                catch(WebException e)
+                catch (Exception e)
                 {
-                    Debug.WriteLine(e.ToString());
+                    Debug.WriteLine("Simulation Thread error :: \n" + e.Message + " \n" + e.StackTrace);
                 }
             }
 
             return elementList;
+        }
+    }
+
+    public class AssetDetailDataThread
+    {
+        private int _threadCount;
+        private string _XMLurl;
+        private ManualResetEvent _DoneEvent;
+        public string AssetName { get; set; }
+        public Dictionary<string,string> Content { get; set; }
+
+        public AssetDetailDataThread(int i, string assetName, string xmlURL, ManualResetEvent doneEvent)
+        {
+            _threadCount = i;
+            _DoneEvent = doneEvent;
+            _XMLurl = xmlURL;
+            AssetName = assetName;
+        }
+
+        public void ThreadPoolCallback(Object ThreadContext)
+        {
+            int threadIndex = (int)ThreadContext;
+            Content = GetXMLParser(_XMLurl);
+            _DoneEvent.Set();
+        }
+
+        private Dictionary<string, string> GetXMLParser(string xmlURL)
+        {
+            Dictionary<string, string> list = new Dictionary<string, string>();
+
+            try
+            {
+
+            using (XmlTextReader reader = new XmlTextReader(xmlURL))
+            {
+                string key = "";
+                string content = "";
+
+                while (reader.Read())
+                {
+                    
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                            switch (reader.Name)
+                            {
+                                case "asset_key":
+                                    key = reader.ReadInnerXml();
+                                    break;
+                                case "asset_content":
+                                    content = reader.ReadInnerXml();
+                                    if(key != "" && content != "")
+                                        list.Add(key, content);
+                                    break;
+                            }
+                    }
+                    
+                }
+            }
+
+            }
+            catch(Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+            }
+
+
+            return list;
+        }
+    }
+
+    public class AssetDetailTemplateThread
+    {
+        private int _threadCount;
+        private string _XMLurl;
+        private ManualResetEvent _DoneEvent;
+        public string AssetName { get; set; }
+        public GithubAssetDetailDataTemplate Content { get; set; }
+
+        public AssetDetailTemplateThread(int i, string assetName, string xmlURL, ManualResetEvent doneEvent)
+        {
+            _threadCount = i;
+            _DoneEvent = doneEvent;
+            _XMLurl = xmlURL;
+            AssetName = assetName;
+        }
+
+        public void ThreadPoolCallback(Object ThreadContext)
+        {
+            int threadIndex = (int)ThreadContext;
+            Content = GetXMLParser(_XMLurl);
+            _DoneEvent.Set();
+        }
+
+        private GithubAssetDetailDataTemplate GetXMLParser(string xmlURL)
+        {
+            string name = "";
+            string image = "";
+
+            try
+            {
+               
+
+                using (XmlTextReader reader = new XmlTextReader(xmlURL))
+                {
+                    
+
+                    while (reader.Read())
+                    {
+
+                        if (reader.NodeType == XmlNodeType.Element && reader.Name == "ElementTemplate" )
+                        {
+                            if (reader.GetAttribute("Name") != null && reader.GetAttribute("Name") != "")
+                                name = reader.GetAttribute("Name");
+
+                            if (reader.GetAttribute("Image") != null && reader.GetAttribute("Image") != "")
+                            {
+                                image = reader.GetAttribute("Image");
+                                return new GithubAssetDetailDataTemplate(name, image, AssetName);
+                            }
+                                
+                        }
+
+                    }
+
+                 
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.StackTrace);
+            }
+
+            return null;
+
         }
     }
 
@@ -420,4 +950,6 @@ namespace AssetsMatrix.Core
             }
         }
     }
+
+    #endregion
 }

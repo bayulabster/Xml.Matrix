@@ -7,6 +7,87 @@ namespace AssetsMatrix.Core
     {
     }
 
+    public class GithubAssetDataClass : ItemDataClass
+    {
+        public string Content { get; private set; }
+
+        public GithubAssetDataClass(string content)
+        {
+            Content = content;
+        }
+    }
+
+    public class GithubSimulationDataClass : ItemDataClass
+    {
+        public string XMLURL { get; private set; }
+        public string XMLName { get; private set; }
+        public List<string> ElementList { get; private set; }
+
+        public GithubSimulationDataClass(string xmlname, List<string> elementList)
+        {
+            XMLName = xmlname;
+            ElementList = elementList;
+        }
+    }
+
+    public class GithubSimulationDataURL : ItemDataClass
+    {
+        public string XMLURL { get; private set; }
+        public string SimulationName { get; private set; }
+
+        public GithubSimulationDataURL(string xmlURL, string simulationName)
+        {
+            XMLURL = xmlURL;
+            SimulationName = simulationName;
+        }
+    }
+
+    public class GithubAssetDetailData : ItemDataClass
+    {
+
+        public string assetName;
+        public string xmlURL;
+        public Dictionary<string, string> AssetContentString { get; set; }
+
+        public GithubAssetDetailData()
+        {
+            AssetContentString = new Dictionary<string, string>();
+        }
+
+        public void AddAssetItem(string key, string content)
+        {
+            Dictionary<string, string> assetContent = new Dictionary<string, string>();
+            assetContent.Add(key, content);
+        }
+
+    }
+
+    public class GithubAssetDetailTemplateUrl : ItemDataClass
+    {
+        public string XMLName { get; private set; }
+        public string XMLURL { get; private set; }
+
+        public GithubAssetDetailTemplateUrl(string xmlname, string xmlurl)
+        {
+            XMLName = xmlname;
+            XMLURL = xmlurl;
+        }
+    }
+
+    public class GithubAssetDetailDataTemplate : ItemDataClass
+    {
+        public string Name { get; private set; }
+        public string ImageUrl { get; private set; }
+        public string AssetName { get; private set; }
+
+        public GithubAssetDetailDataTemplate(string name, string imageurl, string assetname)
+        {
+            Name = name;
+            ImageUrl = imageurl;
+            AssetName = assetname;
+        }
+    }
+
     public class AssetsListItemData: ItemDataClass
     {
         public string ScreenShot { get; private set; }
