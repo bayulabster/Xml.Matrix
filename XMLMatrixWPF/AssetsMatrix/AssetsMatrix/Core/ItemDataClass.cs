@@ -33,12 +33,21 @@ namespace AssetsMatrix.Core
     public class GithubSimulationDataURL : ItemDataClass
     {
         public string XMLURL { get; private set; }
+        public string XMLContents { get; private set; }
         public string SimulationName { get; private set; }
 
         public GithubSimulationDataURL(string xmlURL, string simulationName)
         {
             XMLURL = xmlURL;
             SimulationName = simulationName;
+            XMLContents = null;
+        }
+
+        public GithubSimulationDataURL(string xmlURL, string simulationName, string xmlContents)
+        {
+            XMLURL = xmlURL;
+            SimulationName = simulationName;
+            XMLContents = XMLContents;
         }
     }
 

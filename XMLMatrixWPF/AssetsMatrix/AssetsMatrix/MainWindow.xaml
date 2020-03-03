@@ -10,7 +10,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,35,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="15" Width="99" Height="26"/>
+        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,35,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="15" Width="120" Height="26"/>
         <Image x:Name="Labster___Copy_png" Margin="0,16,1477,926" Source="Labster - Copy.png"/>
         <Button x:Name="button_Login" Click="button_Login_Click" Content="Login" HorizontalAlignment="Left" Margin="1113,19,0,0" VerticalAlignment="Top" Width="126" Height="41" Background="#FF4D6873" Foreground="White" FontSize="16" BorderBrush="#FFDAD7D7"/>
 
@@ -53,7 +53,7 @@
             </DataGrid.RenderTransform>
         </DataGrid>
 
-        <DataGrid x:Name="SimulationList" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30"  HorizontalAlignment="Left" Margin="866,102,0,0" VerticalAlignment="Top" Height="553" Width="373" Background="Black" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding}" IsReadOnly="True">
+        <DataGrid x:Name="SimulationList" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30"  HorizontalAlignment="Left" Margin="866,102,0,0" VerticalAlignment="Top" Height="553" Width="373" Background="Black" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding}" IsReadOnly="True" MouseDoubleClick="SimulationList_MouseDoubleClick">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}" >
                     <Setter Property="Background" Value="#FF292F31" />
@@ -67,13 +67,6 @@
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn MinWidth="300" Binding="{Binding Path=Name}" Header="Name" Foreground="White">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Background" Value="#FF292F31" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn MinWidth="150" Binding="{Binding Path=Count}"  Header="Count">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Background" Value="#FF292F31" />

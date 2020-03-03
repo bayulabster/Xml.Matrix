@@ -93,7 +93,7 @@ namespace AssetsMatrix
 #endif
             SetLoading(false);
             simulation_repo_textBox.Text = "master";
-            asset_repo_textBox.Text = "2018";
+            asset_repo_textBox.Text = "2019";
 
             AssetsListGrid.DataContext = AssetLists;
             SimulationList.DataContext = _SimulationListObjects;
@@ -209,7 +209,8 @@ namespace AssetsMatrix
 
         private void FethcingDataFromGithub()
         {
-            GithubFetchingDataForAssetDataDetailsFromTemplate();
+            GithubFetchingDataForAssetDetails();
+            //GithubFetchingDataForAssetDataDetailsFromTemplate();
         }
 
         private void GithubFetchingDataForAssetDataDetailsFromTemplate()
@@ -244,6 +245,9 @@ namespace AssetsMatrix
 
         private void GithubFetchingDataForAssetDetails()
         {
+            if (!_bIsLogin)
+                SetLoading(true);
+
             string repoName = "AssetDetails";
             string branchName = "master";
 
@@ -485,7 +489,6 @@ namespace AssetsMatrix
                 }
             }
 
-
             //TODO: Ugly, need refactoring
             for (int i = 0; i < _SimulationItemData.Count; i++)
             {
@@ -519,6 +522,24 @@ namespace AssetsMatrix
 
         }
 
+        private void SearchForAssetsFromSimulations(string value)
+        {
+            AssetLists.Clear();
+            string simulationName = value.ToLower();
+            foreach(SimulationItemData simData in _SimulationItemData)
+            {
+                if(simData.GetSimulationName.ToLower().Contains(simulationName))
+                {
+                    foreach(string assetElement in simData.GetElementList)
+                    {
+                        AssetLists.Add(new AssetsListObjects("",assetElement, assetElement, assetElement,"","",""));
+                    }
+                    return;
+                }
+            }
+
+        }
+
         private void SearchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (SearchListBox.ItemsSource != null)
@@ -537,6 +558,16 @@ namespace AssetsMatrix
         {
 
             AssetLists.Clear();
+            _SimulationListObjects.Clear();
+
+            if (string.IsNullOrEmpty(textBox.Text))
+                return;
+
+            string lowerCaseTextBox = textBox.Text.ToLower();
+            bool bIsSimulation = false;
+
+            if (textBox.Text.Contains("engine_"))
+                bIsSimulation = true;
 #if WEB_URL
             foreach (AssetsListItemData assetObj in _AssetsListItemData)
             {
@@ -553,19 +584,30 @@ namespace AssetsMatrix
                 }
             }
 #elif GITHUB
-            foreach (GithubAssetDataClass assetObj in _AssetListItemDataGithub)
+            if(bIsSimulation)
             {
-
-                if (!string.IsNullOrEmpty(textBox.Text))
+                foreach(SimulationItemData simulation in _SimulationItemData)
                 {
-                    string lowerCaseTextBox = textBox.Text.ToLower();
-                    string assetObjLowerCase = assetObj.Content.ToLower();
-                    if (assetObjLowerCase.StartsWith(lowerCaseTextBox))
+                    string simulationName = simulation.GetSimulationName.ToLower();
+                    if (simulationName.StartsWith(lowerCaseTextBox))
                     {
-                        AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
+                        _SimulationListObjects.Add(new SimulationListObject(simulation.GetSimulationName,""));
                     }
                 }
             }
+            else
+            {
+                foreach (GithubAssetDataClass assetObj in _AssetListItemDataGithub)
+                {
+                        string assetObjLowerCase = assetObj.Content.ToLower();
+                        if (assetObjLowerCase.StartsWith(lowerCaseTextBox))
+                        {
+                            AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
+                        }
+                    
+                }
+            }
+            
 #endif
 
         }
@@ -747,6 +789,16 @@ namespace AssetsMatrix
         {
             _AssetXMLName = "";
             GithubFetchingDataForAssetDetails();
+        }
+
+        private void SimulationList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            _AssetDetailList.Clear();
+            DataGrid row = (DataGrid)sender;
+            SimulationListObject asset = row.SelectedItem as SimulationListObject;
+            SearchForAssetsFromSimulations(asset.Name);
+            //SearchForGameObject(asset.SourceId);
+            //_AssetXMLName = asset.SourceId + ".xml";
         }
     }
 }
