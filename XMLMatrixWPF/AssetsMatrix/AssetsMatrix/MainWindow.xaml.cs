@@ -17,6 +17,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.IO;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace AssetsMatrix
 {
@@ -58,9 +59,12 @@ namespace AssetsMatrix
         private List<SimulationItemData> _SimulationItemData;
         private List<AssetsListItemData> _AssetsListItemData;
         private List<GithubAssetDataClass> _AssetListItemDataGithub;
+        private List<GithubAnimationDataClass> _AnimationListItemDataGithub;
+        private List<GithubCharacterDataClass> _CharacterListItemDataGithub;
         private List<GithubAssetDetailData> _AssetListDataDetails;
         private List<GithubAssetDetailDataTemplate> _AssetListDataTemplate;
         private string _AssetXMLName;
+        private int _AssetsSelection;
 
         public ObservableCollection<AssetsListObjects> AssetLists;
         public ObservableCollection<SimulationListObject> _SimulationListObjects;
@@ -89,6 +93,8 @@ namespace AssetsMatrix
             _AssetListItemDataGithub = new List<GithubAssetDataClass>();
             _AssetListDataDetails = new List<GithubAssetDetailData>();
             _AssetListDataTemplate = new List<GithubAssetDetailDataTemplate>();
+            _AnimationListItemDataGithub = new List<GithubAnimationDataClass>();
+            _CharacterListItemDataGithub = new List<GithubCharacterDataClass>();
 
 #endif
             SetLoading(false);
@@ -98,6 +104,8 @@ namespace AssetsMatrix
             AssetsListGrid.DataContext = AssetLists;
             SimulationList.DataContext = _SimulationListObjects;
             AssetDetailsList.ItemsSource = _AssetDetailList;
+
+            _AssetsSelection = comboBox.SelectedIndex = 0;
         }
 
         private void SetLoading(bool value)
@@ -301,10 +309,54 @@ namespace AssetsMatrix
                 }
             }
 
-            if (_bIsLogin)
-                GithubFetchingDataForSimulation();
-            else
-                SetLoading(false);
+            string repoName = "Labster.Art.Animations";
+            string branchName = asset_repo_textBox.Text;
+
+            GithubAnimationListDataParsing githubParsing = new GithubAnimationListDataParsing(_Client, repoName, branchName);
+            githubParsing.StartParsing();
+            githubParsing.xmlEvent += OnGithubFetchingAnimationDataCompleted;
+           
+        }
+
+        private void OnGithubFetchingAnimationDataCompleted(object sender, XMLParsingEventArgs args)
+        {
+            _AnimationListItemDataGithub.Clear();
+
+            if (args._ItemDataClass != null)
+            {
+                foreach (ItemDataClass data in args._ItemDataClass)
+                {
+                    GithubAnimationDataClass assetData = data as GithubAnimationDataClass;
+                    _AnimationListItemDataGithub.Add(assetData);
+                }
+            }
+            GithubFetchingDataForCharacter();
+        }
+
+        private void GithubFetchingDataForCharacter()
+        {
+            string repoName = "Labster.Art.LabCharacters";
+            string branchName = simulation_repo_textBox.Text;
+
+            GithubCharacterListDataParsing githubParsing = new GithubCharacterListDataParsing(_Client, repoName, branchName);
+            githubParsing.StartParsing();
+            githubParsing.xmlEvent += OnGithubFetchingCharacterDataCompleted;
+        }
+
+        private void OnGithubFetchingCharacterDataCompleted(object sender, XMLParsingEventArgs args)
+        {
+            _CharacterListItemDataGithub.Clear();
+
+            if(args._ItemDataClass != null)
+            {
+                foreach(ItemDataClass data in args._ItemDataClass)
+                {
+                    GithubCharacterDataClass assetData = data as GithubCharacterDataClass;
+                    _CharacterListItemDataGithub.Add(assetData);
+                }
+            }
+
+            GithubFetchingDataForSimulation();
         }
 
         private void GithubFetchingDataForSimulation()
@@ -454,25 +506,105 @@ namespace AssetsMatrix
             }
 
 #elif GITHUB
-            for (int i = 0; i < _AssetListItemDataGithub.Count; i++)
-            {
-                string sourceIdLower = _AssetListItemDataGithub[i].Content.ToLower();
-
-                if (sourceIdLower.Contains(toLowerCase))
-                {
-                    GithubAssetDataClass assetObject = _AssetListItemDataGithub[i];
-                    AssetLists.Add(new AssetsListObjects("", assetObject.Content, "", "", "", "", ""));
-                }
-            }
+            ProcessDataList(toLowerCase);
 #endif
         }
 
+        private void ProcessDataList(string value, bool bIsAll=false, bool bIsStrictMode = false)
+        {
+            switch (_AssetsSelection)
+            {
+                case 0:
+                    ProcessDataListAssets(value, bIsAll, bIsStrictMode);
+                    break;
+                case 1:
+                    ProcessDataListAnimation(value, bIsAll, bIsStrictMode);
+                    break;
+                case 2:
+                    ProcessDataListCharacter(value, bIsAll);
+                    break;
+            }
+        }
+
+        private void ProcessDataListAssets(string value, bool bIsAll = false, bool isStrictMode = false)
+        {
+            try
+            {
+                if (bIsAll)
+                    _AssetListItemDataGithub.ForEach(assetObj => { AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", "")); });
+
+                foreach (GithubAssetDataClass assetObj in _AssetListItemDataGithub)
+                {
+                    string assetObjLowerCase = assetObj.Content.ToLower();
+                    bool isMatch = isStrictMode ? assetObjLowerCase.Equals(value) :
+                    Regex.IsMatch(assetObjLowerCase, value);
+                    if (isMatch)
+                    {
+                        AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
+                    }
+                }
+            }catch(Exception e)
+            {
+
+            }
+            
+        }
+
+        private void ProcessDataListAnimation(string value,bool bIsAll = false, bool isStrictMode = false)
+        {
+            try
+            {
+                if (bIsAll)
+                    _AnimationListItemDataGithub.ForEach(assetObj => { AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", "")); });
+
+                foreach (GithubAnimationDataClass assetObj in _AnimationListItemDataGithub)
+                {
+                    string assetObjLowerCase = assetObj.Content.ToLower();
+                    bool isMatch = isStrictMode ? assetObjLowerCase.Equals(value) :
+                    Regex.IsMatch(assetObjLowerCase, value);
+                    if (isMatch)
+                    {
+                        AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
+                    }
+                }
+            }catch(Exception e)
+            {
+
+            }
+            
+        }
+
+        private void ProcessDataListCharacter(string value, bool bIsAll = false, bool isStrictMode = false)
+        {
+            try
+            {
+                if (bIsAll)
+                    _CharacterListItemDataGithub.ForEach(assetObj => { AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", "")); });
+
+                foreach (GithubCharacterDataClass assetObj in _CharacterListItemDataGithub)
+                {
+                    string assetObjLowerCase = assetObj.Content.ToLower();
+                    bool isMatch = isStrictMode ? assetObjLowerCase.Equals(value) :
+                    Regex.IsMatch(assetObjLowerCase, value);
+                    if (isMatch)
+                    {
+                        AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+
+            }
+            
+        }
+
+        
+
         private void SearchForGameObject(string value)
         {
-
             _SimulationListObjects.Clear();
-            string textboxString = value.ToLower();
-            Debug.WriteLine(" the keyword is :: " + value.ToLower());
+            string textboxString = value.Contains("/") ? AssetMatrixStaticFunction.TrimString(value.ToLower()) : value.ToLower();
             string[] simulationArray = new string[_SimulationItemData.Count];
             List<SimulationStruct> simulationStructArray = new List<SimulationStruct>();
 
@@ -532,7 +664,7 @@ namespace AssetsMatrix
                 {
                     foreach(string assetElement in simData.GetElementList)
                     {
-                        AssetLists.Add(new AssetsListObjects("",assetElement, assetElement, assetElement,"","",""));
+                        ProcessDataList(assetElement,false,true);
                     }
                     return;
                 }
@@ -565,9 +697,19 @@ namespace AssetsMatrix
 
             string lowerCaseTextBox = textBox.Text.ToLower();
             bool bIsSimulation = false;
+            bool bIsAll = false;
+            string engineKeyword = "engine_";
+            string allKeyword = "(all)";
 
-            if (textBox.Text.Contains("engine_"))
+            if (textBox.Text.ToLower().Contains(engineKeyword))
                 bIsSimulation = true;
+
+            if (textBox.Text.ToLower().Contains(allKeyword))
+            {
+                lowerCaseTextBox = string.Empty;
+                bIsAll = true;
+            }
+                
 #if WEB_URL
             foreach (AssetsListItemData assetObj in _AssetsListItemData)
             {
@@ -584,30 +726,31 @@ namespace AssetsMatrix
                 }
             }
 #elif GITHUB
-            if(bIsSimulation)
+            if (bIsSimulation)
             {
-                foreach(SimulationItemData simulation in _SimulationItemData)
+                foreach (SimulationItemData simulation in _SimulationItemData)
                 {
-                    string simulationName = simulation.GetSimulationName.ToLower();
-                    if (simulationName.StartsWith(lowerCaseTextBox))
+                    if (!bIsAll)
                     {
-                        _SimulationListObjects.Add(new SimulationListObject(simulation.GetSimulationName,""));
+                        string simulationName = simulation.GetSimulationName.ToLower();
+                        if (simulationName.StartsWith(lowerCaseTextBox))
+                        {
+                            _SimulationListObjects.Add(new SimulationListObject(simulation.GetSimulationName, ""));
+                        }
+
                     }
+                    else
+                    {
+                        _SimulationListObjects.Add(new SimulationListObject(simulation.GetSimulationName, ""));
+                    }
+
                 }
+
             }
             else
             {
-                foreach (GithubAssetDataClass assetObj in _AssetListItemDataGithub)
-                {
-                        string assetObjLowerCase = assetObj.Content.ToLower();
-                        if (assetObjLowerCase.StartsWith(lowerCaseTextBox))
-                        {
-                            AssetLists.Add(new AssetsListObjects("", assetObj.Content, assetObj.Content, assetObj.Content, "", "", ""));
-                        }
-                    
-                }
+                ProcessDataList(lowerCaseTextBox, bIsAll);
             }
-            
 #endif
 
         }
@@ -799,6 +942,23 @@ namespace AssetsMatrix
             SearchForAssetsFromSimulations(asset.Name);
             //SearchForGameObject(asset.SourceId);
             //_AssetXMLName = asset.SourceId + ".xml";
+        }
+
+        private void checkBox_assets_Checked(object sender, RoutedEventArgs e)
+        {
+           
+        }
+
+        private void comboBox_Selected(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(sender);
+            //_AssetsSelection
+        }
+
+        private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox box = (ComboBox)sender;
+            _AssetsSelection = box.SelectedIndex;
         }
     }
 }

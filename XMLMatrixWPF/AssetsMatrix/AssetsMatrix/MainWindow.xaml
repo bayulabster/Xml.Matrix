@@ -147,6 +147,11 @@
         <Button x:Name="button_assetDetailRefresh" Click="OnMouseClick_RefreshAssetDetailData" Content="Refresh" HorizontalAlignment="Left" Margin="432,74,0,0" VerticalAlignment="Top" Width="75" Height="24" Background="#FF212628" FontSize="15" Foreground="White" BorderBrush="{x:Null}"/>
         <TextBox x:Name="simulation_repo_textBox" HorizontalAlignment="Left" Height="26" Margin="1039,74,0,0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top" Width="120" Background="#FF454849" Foreground="White" FontSize="15" SelectionBrush="White" BorderBrush="{x:Null}" CaretBrush="White" MaxLines="1"/>
         <TextBox x:Name="asset_repo_textBox" HorizontalAlignment="Left" Height="26" Margin="661,73,0,0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top" Width="120" Background="#FF454849" Foreground="White" FontSize="15" SelectionBrush="White" BorderBrush="{x:Null}" CaretBrush="White" MaxLines="1"/>
+        <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="701,104,0,0" VerticalAlignment="Top" Width="120" Height="26" SelectionChanged="comboBox_SelectionChanged" ToolTip="Choose which data that you wanted to query" FontSize="12">
+            <ComboBoxItem Content="Assets" HorizontalAlignment="Left" Width="120"/>
+            <ComboBoxItem Content="Animations" HorizontalAlignment="Left" Width="120"/>
+            <ComboBoxItem Content="Character" HorizontalAlignment="Left" Width="120"/>
+        </ComboBox>
 
     </Grid>
 </Window>

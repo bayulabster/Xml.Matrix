@@ -211,6 +211,138 @@ namespace AssetsMatrix.Core
         
     }
 
+    public class GithubAnimationListDataParsing : GithubDataParsingBase
+    {
+
+        public GithubAnimationListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            try
+            {
+                List<string> AssetDataList = GetAnimationDataFromGithub(_Client).Result;
+
+                List<ItemDataClass> AssetDataClassList = new List<ItemDataClass>();
+
+                foreach (string s in AssetDataList)
+                {
+                    var assetData = new GithubAnimationDataClass(s);
+                    AssetDataClassList.Add(assetData);
+                }
+
+                args.Result = AssetDataClassList;
+
+                base.BackgroundWorkerDoWork(sender, args);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("GithubAssetListDataParsing_BackroundWorkerDoWork :: " + e.Message + " : " + e.StackTrace);
+            }
+
+        }
+
+        private async Task<List<string>> GetAnimationDataFromGithub(GitHubClient client)
+        {
+            var file = await client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Animation.txt", _BranchName);
+            var file2 = await client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Scenes.txt", _BranchName);
+
+            string returnedString = "";
+            foreach (var f in file)
+            {
+                returnedString += f.Content;
+            }
+
+            foreach (var f in file2)
+            {
+                returnedString += f.Content;
+            }
+
+            List<String> ListOfAssets = GetAllAnimationsFromGithubText(returnedString);
+
+            return ListOfAssets;
+        }
+
+        private List<String> GetAllAnimationsFromGithubText(string value)
+        {
+            List<String> returnedString = new List<string>();
+
+            string returnValue = value;
+            string[] stringArray = returnValue.Split('\n');
+            foreach (string s in stringArray)
+            {
+                if (s.Length > 0)
+                {
+                    returnedString.Add(AssetMatrixStaticFunction.ExtractStringFromPath(s));
+                }
+            }
+            return returnedString;
+        }
+
+    }
+
+    public class GithubCharacterListDataParsing : GithubDataParsingBase
+    {
+
+        public GithubCharacterListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
+
+        protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
+        {
+            try
+            {
+                List<string> AssetDataList = GetCharacterDataFromGithub(_Client).Result;
+
+                List<ItemDataClass> AssetDataClassList = new List<ItemDataClass>();
+
+                foreach (string s in AssetDataList)
+                {
+                    var assetData = new GithubCharacterDataClass(s);
+                    AssetDataClassList.Add(assetData);
+                }
+
+                args.Result = AssetDataClassList;
+
+                base.BackgroundWorkerDoWork(sender, args);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("GithubAssetListDataParsing_BackroundWorkerDoWork :: " + e.Message + " : " + e.StackTrace);
+            }
+
+        }
+
+        private async Task<List<string>> GetCharacterDataFromGithub(GitHubClient client)
+        {
+            var file = await client.Repository.Content.GetAllContentsByRef(GITHUB_REPO_OWNER, _RepoName, "Characters.txt", _BranchName);
+
+            string returnedString = "";
+            foreach (var f in file)
+            {
+                returnedString += f.Content;
+            }
+
+            List<String> ListOfAssets = GetAllCharactersFromGithubText(returnedString);
+
+            return ListOfAssets;
+        }
+
+        private List<String> GetAllCharactersFromGithubText(string value)
+        {
+            List<String> returnedString = new List<string>();
+
+            string returnValue = value;
+            string[] stringArray = returnValue.Split('\n');
+            foreach (string s in stringArray)
+            {
+                if (s.Length > 0)
+                {
+                    returnedString.Add(AssetMatrixStaticFunction.ExtractStringFromPath(s));
+                }
+            }
+            return returnedString;
+        }
+
+    }
+
     public class GithubSimulationListDataParsing : GithubDataParsingBase
     {
         private const int MAX_BATCH = 1024;
@@ -712,11 +844,23 @@ namespace AssetsMatrix.Core
                 {
                     while (xmlReader.Read())
                     {
+                        //for assets
                         if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Asset")
                         {
                             if (xmlReader.GetAttribute("AssetPath") != "" && xmlReader.GetAttribute("AssetPath") != null)
                             {
                                 string sourceId = xmlReader.GetAttribute("AssetPath").ToLower();
+                                sourceId = sourceId.Contains("/") ? AssetMatrixStaticFunction.TrimString(sourceId.ToLower()) : sourceId.ToLower();
+                                elementList.Add(sourceId);
+                            }
+                        }
+                        //for animations in scenes
+                        if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Scene")
+                        {
+                            if (xmlReader.GetAttribute("AssetPath") != "" && xmlReader.GetAttribute("AssetPath") != null)
+                            {
+                                string sourceId = xmlReader.GetAttribute("AssetPath").ToLower();
+                                sourceId = sourceId.Contains("/") ? AssetMatrixStaticFunction.TrimString(sourceId.ToLower()) : sourceId.ToLower();
                                 elementList.Add(sourceId);
                             }
                         }

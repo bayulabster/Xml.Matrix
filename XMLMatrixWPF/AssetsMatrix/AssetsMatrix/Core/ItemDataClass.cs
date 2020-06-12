@@ -7,11 +7,31 @@ namespace AssetsMatrix.Core
     {
     }
 
+    public class GithubCharacterDataClass : ItemDataClass
+    {
+        public string Content { get; private set; }
+
+        public GithubCharacterDataClass(string content)
+        {
+            Content = content;
+        }
+    }
+
     public class GithubAssetDataClass : ItemDataClass
     {
         public string Content { get; private set; }
 
         public GithubAssetDataClass(string content)
+        {
+            Content = content;
+        }
+    }
+
+    public class GithubAnimationDataClass : ItemDataClass
+    {
+        public string Content { get; private set; }
+
+        public GithubAnimationDataClass(string content)
         {
             Content = content;
         }
