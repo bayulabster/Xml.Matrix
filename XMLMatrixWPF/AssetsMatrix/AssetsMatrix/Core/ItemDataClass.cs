@@ -7,11 +7,31 @@ namespace AssetsMatrix.Core
     {
     }
 
+    public class GithubCharacterDataClass : ItemDataClass
+    {
+        public string Content { get; private set; }
+
+        public GithubCharacterDataClass(string content)
+        {
+            Content = content;
+        }
+    }
+
     public class GithubAssetDataClass : ItemDataClass
     {
         public string Content { get; private set; }
 
         public GithubAssetDataClass(string content)
+        {
+            Content = content;
+        }
+    }
+
+    public class GithubAnimationDataClass : ItemDataClass
+    {
+        public string Content { get; private set; }
+
+        public GithubAnimationDataClass(string content)
         {
             Content = content;
         }
@@ -33,12 +53,21 @@ namespace AssetsMatrix.Core
     public class GithubSimulationDataURL : ItemDataClass
     {
         public string XMLURL { get; private set; }
+        public string XMLContents { get; private set; }
         public string SimulationName { get; private set; }
 
         public GithubSimulationDataURL(string xmlURL, string simulationName)
         {
             XMLURL = xmlURL;
             SimulationName = simulationName;
+            XMLContents = null;
+        }
+
+        public GithubSimulationDataURL(string xmlURL, string simulationName, string xmlContents)
+        {
+            XMLURL = xmlURL;
+            SimulationName = simulationName;
+            XMLContents = XMLContents;
         }
     }
 

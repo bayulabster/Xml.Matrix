@@ -10,7 +10,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,35,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="15" Width="99" Height="26"/>
+        <Label x:Name="label" Content="Assets Matrix" HorizontalAlignment="Left" Margin="31,35,0,0" VerticalAlignment="Top" Foreground="White" Cursor="None" FontSize="15" Width="120" Height="26"/>
         <Image x:Name="Labster___Copy_png" Margin="0,16,1477,926" Source="Labster - Copy.png"/>
         <Button x:Name="button_Login" Click="button_Login_Click" Content="Login" HorizontalAlignment="Left" Margin="1113,19,0,0" VerticalAlignment="Top" Width="126" Height="41" Background="#FF4D6873" Foreground="White" FontSize="16" BorderBrush="#FFDAD7D7"/>
 
@@ -53,7 +53,7 @@
             </DataGrid.RenderTransform>
         </DataGrid>
 
-        <DataGrid x:Name="SimulationList" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30"  HorizontalAlignment="Left" Margin="866,102,0,0" VerticalAlignment="Top" Height="553" Width="373" Background="Black" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding}" IsReadOnly="True">
+        <DataGrid x:Name="SimulationList" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" ColumnHeaderHeight="30"  HorizontalAlignment="Left" Margin="866,102,0,0" VerticalAlignment="Top" Height="553" Width="373" Background="Black" Foreground="White" BorderBrush="#FF292626" FontSize="12" ItemsSource="{Binding}" IsReadOnly="True" MouseDoubleClick="SimulationList_MouseDoubleClick">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}" >
                     <Setter Property="Background" Value="#FF292F31" />
@@ -67,13 +67,6 @@
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn MinWidth="300" Binding="{Binding Path=Name}" Header="Name" Foreground="White">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Background" Value="#FF292F31" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn MinWidth="150" Binding="{Binding Path=Count}"  Header="Count">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Background" Value="#FF292F31" />
@@ -154,6 +147,11 @@
         <Button x:Name="button_assetDetailRefresh" Click="OnMouseClick_RefreshAssetDetailData" Content="Refresh" HorizontalAlignment="Left" Margin="432,74,0,0" VerticalAlignment="Top" Width="75" Height="24" Background="#FF212628" FontSize="15" Foreground="White" BorderBrush="{x:Null}"/>
         <TextBox x:Name="simulation_repo_textBox" HorizontalAlignment="Left" Height="26" Margin="1039,74,0,0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top" Width="120" Background="#FF454849" Foreground="White" FontSize="15" SelectionBrush="White" BorderBrush="{x:Null}" CaretBrush="White" MaxLines="1"/>
         <TextBox x:Name="asset_repo_textBox" HorizontalAlignment="Left" Height="26" Margin="661,73,0,0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top" Width="120" Background="#FF454849" Foreground="White" FontSize="15" SelectionBrush="White" BorderBrush="{x:Null}" CaretBrush="White" MaxLines="1"/>
+        <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="701,104,0,0" VerticalAlignment="Top" Width="120" Height="26" SelectionChanged="comboBox_SelectionChanged" ToolTip="Choose which data that you wanted to query" FontSize="12">
+            <ComboBoxItem Content="Assets" HorizontalAlignment="Left" Width="120"/>
+            <ComboBoxItem Content="Animations" HorizontalAlignment="Left" Width="120"/>
+            <ComboBoxItem Content="Character" HorizontalAlignment="Left" Width="120"/>
+        </ComboBox>
 
     </Grid>
 </Window>
