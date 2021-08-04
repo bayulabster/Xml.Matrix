@@ -98,7 +98,7 @@ namespace AssetsMatrix
 
 #endif
             SetLoading(false);
-            simulation_repo_textBox.Text = "master";
+            simulation_repo_textBox.Text = "production-snapshot";
             asset_repo_textBox.Text = "2019";
 
             AssetsListGrid.DataContext = AssetLists;
