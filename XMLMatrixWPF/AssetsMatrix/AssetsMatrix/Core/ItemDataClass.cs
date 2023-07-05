@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 
 namespace AssetsMatrix.Core
@@ -194,11 +197,46 @@ namespace AssetsMatrix.Core
     {
         private string _SimulationName;
         private List<string> _ElementList;
+        private XElement Document;
 
-        public SimulationItemData(string simulationName, List<string> elementList)
+        public SimulationItemData(string simulationName, string xmlContent)
         {
             _SimulationName = simulationName;
-            _ElementList = elementList;
+            Document = XDocument.Parse(xmlContent).Root;
+        }
+
+        
+        public int SearchInXML(XElement elem)
+        {
+            int counter = 0;
+            bool hasAttribute = false;
+            foreach (var el in Document.Elements().DescendantsAndSelf())
+            {
+                if (el.Name != elem.Name)
+                {
+                    continue;
+                }
+
+                hasAttribute = false;
+
+                foreach (var attr in el.Attributes())
+                {
+                    foreach (var elemattr in elem.Attributes())
+                    {
+                        if (attr.Name == elemattr.Name && attr.Value.ToLower() == elemattr.Value.ToLower())
+                        {
+                            hasAttribute = true;
+                        }
+                    }
+                }
+
+                if (hasAttribute)
+                {
+                    counter++;
+                    hasAttribute = false;
+                }
+            }
+            return counter;
         }
 
         public string GetSimulationName

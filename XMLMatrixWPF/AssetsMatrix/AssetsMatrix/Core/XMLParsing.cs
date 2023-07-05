@@ -10,6 +10,8 @@ using System.Net;
 using Octokit;
 using ICSharpCode.SharpZipLib.Zip;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AssetsMatrix.Core
 {
@@ -345,26 +347,15 @@ namespace AssetsMatrix.Core
 
     public class GithubSimulationListDataParsing : GithubDataParsingBase
     {
-        private const int MAX_BATCH = 1024;
+        private const int MAX_BATCH = 64;
 
         public GithubSimulationListDataParsing(GitHubClient client, string repoName, string branchName) : base(client, repoName, branchName) { }
 
         protected override void BackgroundWorkerDoWork(object sender, DoWorkEventArgs args)
         {
+            BackgroundWorker worker = (BackgroundWorker)sender;
+            ProcessGithubSimulationData(worker, args);
             base.BackgroundWorkerDoWork(sender, args);
-
-            try
-            {
-                
-                BackgroundWorker worker = (BackgroundWorker)sender;
-                ProcessGithubSimulationData(worker, args);
-
-                
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("GithubSimulationListDataparsing_BackroundWorkerDoWork :: "+ e.Message + " : "+ e.StackTrace);
-            }
             
         }
 
@@ -376,31 +367,19 @@ namespace AssetsMatrix.Core
                 List<GithubSimulationDataURL> simulationsList =  GetSimulationDataFromGithub().Result;
                 int simulationsCount = simulationsList.Count;
 
-                int maxBatchCount = simulationsCount;
+                SimulationThread[] simulationThreads = new SimulationThread[simulationsCount];
+                for (int i = 0; i < simulationsCount; i++)
+                {
+                    SimulationThread simulationThread = new SimulationThread(i, simulationsList[i].SimulationName, simulationsList[i].XMLURL);
+                    simulationThreads[i] = simulationThread;
 
-                    SimulationThread[] simulationThreads = new SimulationThread[maxBatchCount];
+                    string simulationName = simulationThread.SimulationName;
 
-                    for (int j = 0; j < maxBatchCount; j++)
-                    {
-                        
-                        SimulationThread simulationThread = new SimulationThread(j, simulationsList[j].SimulationName, simulationsList[j].XMLURL);
-                        simulationThreads[j] = simulationThread;
-                        
-                    }
+                    SimulationItemData simulationData = new SimulationItemData(simulationName, simulationThread.XmlString);
+                    itemDataClass.Add(simulationData);
+                }
 
-                    Debug.WriteLine("All Calculation are complete....");
-
-                    for (int j = 0; j < maxBatchCount; j++)
-                    {
-                        SimulationThread simulationThread = simulationThreads[j];
-                        List<string> elementList = simulationThread.ElementList;
-                        string simulationName = simulationThread.SimulationName;
-
-                        SimulationItemData simulationData = new SimulationItemData(simulationName, elementList);
-                        itemDataClass.Add(simulationData);
-                    }
-
-                
+                Debug.WriteLine("All Calculation are complete....");
 
                 args.Result = itemDataClass;
             }
@@ -414,7 +393,7 @@ namespace AssetsMatrix.Core
         private async Task<List<GithubSimulationDataURL>>  GetSimulationDataFromGithub()
         {
 
-            var files = await _Client.Repository.Content.GetArchive(GITHUB_REPO_OWNER, _RepoName, ArchiveFormat.Zipball, "refs/heads/"+_BranchName);
+            var files = await _Client.Repository.Content.GetArchive(GITHUB_REPO_OWNER, _RepoName, ArchiveFormat.Zipball, _BranchName);
             
 
             List<GithubSimulationDataURL> githubList = new List<GithubSimulationDataURL>();
@@ -436,8 +415,8 @@ namespace AssetsMatrix.Core
                     }
                 }
             }
-
-                return githubList;
+            
+            return githubList;
         }
 
         protected override void BackgroundWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs args)
@@ -819,61 +798,16 @@ namespace AssetsMatrix.Core
     public class SimulationThread
     {
         private int _threadCount;
-        private string _XMLurl;
-        
         public string SimulationName { get; set; }
-        public List<string> ElementList { get; set; }
+        public string XmlString { get; set; }
 
-        public SimulationThread(int i, string simulationName, string xmlURL)
+    public SimulationThread(int i, string simulationName, string xmlURL)
         {
             _threadCount = i;
-            _XMLurl = xmlURL;
+            XmlString = xmlURL;
             SimulationName = simulationName;
-
-            ElementList = GetXMLParser(_XMLurl);
         }
 
-      
-        private List<string> GetXMLParser(string xmlURL)
-        {
-            List<string> elementList = new List<string>();
-
-            using (XmlTextReader xmlReader = new XmlTextReader(new StringReader(xmlURL)))
-            {
-                try
-                {
-                    while (xmlReader.Read())
-                    {
-                        //for assets
-                        if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Asset")
-                        {
-                            if (xmlReader.GetAttribute("AssetPath") != "" && xmlReader.GetAttribute("AssetPath") != null)
-                            {
-                                string sourceId = xmlReader.GetAttribute("AssetPath").ToLower();
-                                sourceId = sourceId.Contains("/") ? AssetMatrixStaticFunction.TrimString(sourceId.ToLower()) : sourceId.ToLower();
-                                elementList.Add(sourceId);
-                            }
-                        }
-                        //for animations in scenes
-                        if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "Scene")
-                        {
-                            if (xmlReader.GetAttribute("AssetPath") != "" && xmlReader.GetAttribute("AssetPath") != null)
-                            {
-                                string sourceId = xmlReader.GetAttribute("AssetPath").ToLower();
-                                sourceId = sourceId.Contains("/") ? AssetMatrixStaticFunction.TrimString(sourceId.ToLower()) : sourceId.ToLower();
-                                elementList.Add(sourceId);
-                            }
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine("Simulation Thread error :: \n" + e.Message + " \n" + e.StackTrace);
-                }
-            }
-
-            return elementList;
-        }
     }
 
     public class AssetDetailDataThread
@@ -1056,10 +990,9 @@ namespace AssetsMatrix.Core
                 for (int j = 0; j < maxBatchCount; j++)
                 {
                     SimulationThread simulationThread = simulationThreads[j];
-                    List<string> elementList = simulationThread.ElementList;
                     string simulationName = simulationThread.SimulationName;
 
-                    SimulationItemData simulationData = new SimulationItemData(simulationName, elementList);
+                    SimulationItemData simulationData = new SimulationItemData(simulationName, simulationThread.XmlString);
                     itemDataClass.Add(simulationData);
                 }
             }
