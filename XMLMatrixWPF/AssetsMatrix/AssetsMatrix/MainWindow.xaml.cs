@@ -253,10 +253,10 @@ namespace AssetsMatrix
 
             int simcounter = 0;
             
-            XElement xmlToSearch = CreateXElementFromSearchedText();
+            string lowerCaseTextBox = textBox.Text;
             foreach (SimulationItemData simulation in _SimulationItemData)
             {
-                int counterSearch = simulation.SearchInXML(xmlToSearch);
+                int counterSearch = simulation.SearchInXML(lowerCaseTextBox);
 
                 if (counterSearch == 0)
                 {

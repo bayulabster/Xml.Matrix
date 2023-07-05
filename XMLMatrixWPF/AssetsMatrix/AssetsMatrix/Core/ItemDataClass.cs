@@ -206,35 +206,17 @@ namespace AssetsMatrix.Core
         }
 
         
-        public int SearchInXML(XElement elem)
+        public int SearchInXML(string elem)
         {
             int counter = 0;
-            bool hasAttribute = false;
+            string toLowerString = elem.ToLower();
             foreach (var el in Document.Elements().DescendantsAndSelf())
             {
-                if (el.Name != elem.Name)
+                if (el.Name.LocalName.ToLower() != toLowerString)
                 {
                     continue;
                 }
-
-                hasAttribute = false;
-
-                foreach (var attr in el.Attributes())
-                {
-                    foreach (var elemattr in elem.Attributes())
-                    {
-                        if (attr.Name == elemattr.Name && attr.Value.ToLower() == elemattr.Value.ToLower())
-                        {
-                            hasAttribute = true;
-                        }
-                    }
-                }
-
-                if (hasAttribute)
-                {
-                    counter++;
-                    hasAttribute = false;
-                }
+                counter++;
             }
             return counter;
         }
