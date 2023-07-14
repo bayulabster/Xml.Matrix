@@ -196,11 +196,11 @@ namespace AssetsMatrix.Core
     public class SimulationItemData : ItemDataClass
     {
         private string _SimulationName;
-        private List<string> _ElementList;
         private XElement Document;
 
         public SimulationItemData(string simulationName, string xmlContent)
         {
+
             _SimulationName = simulationName;
             Document = XDocument.Parse(xmlContent).Root;
         }
@@ -229,12 +229,5 @@ namespace AssetsMatrix.Core
             }
         }
 
-        public List<string> GetElementList
-        {
-            get
-            {
-                return _ElementList;
-            }
-        }
     }
 }

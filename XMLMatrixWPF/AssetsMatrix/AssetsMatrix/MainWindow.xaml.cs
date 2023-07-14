@@ -10,6 +10,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Octokit;
 
+
 namespace AssetsMatrix
 {
     struct SimulationStruct
@@ -38,6 +39,16 @@ namespace AssetsMatrix
         public string Count { get; set; }
     }
 
+    public class TagNames
+    {
+        public TagNames(string name)
+        {
+            Name = name;
+        }
+
+        public string Name { get; set; }
+    }
+
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -45,6 +56,7 @@ namespace AssetsMatrix
     public partial class MainWindow : Window
     {
         private const string IMAGE_FILEPATH = "http://labsterim.s3.amazonaws.com/media/labimages/PrefabData/";
+        private const double HEIGHT = 30;
 
         private List<SimulationItemData> _SimulationItemData;
         private List<GithubAssetDataClass> _AssetListItemDataGithub;
@@ -55,8 +67,10 @@ namespace AssetsMatrix
 
         public ObservableCollection<AssetsListObjects> AssetLists;
         public ObservableCollection<SimulationListObject> _SimulationListObjects;
+        public ObservableCollection<TagNames> _TagNamesList;
 
         private bool _bIsLogin;
+        private bool _bIsSelected;
 
         private GitHubClient _Client;
 
@@ -66,6 +80,7 @@ namespace AssetsMatrix
             AssetLists = new ObservableCollection<AssetsListObjects>();
             _SimulationListObjects = new ObservableCollection<SimulationListObject>();
             _SimulationItemData = new List<SimulationItemData>();
+            _TagNamesList = new ObservableCollection<TagNames>();
 
             _AssetListItemDataGithub = new List<GithubAssetDataClass>();
             _AssetListDataDetails = new List<GithubAssetDetailData>();
@@ -73,9 +88,21 @@ namespace AssetsMatrix
             _AnimationListItemDataGithub = new List<GithubAnimationDataClass>();
             _CharacterListItemDataGithub = new List<GithubCharacterDataClass>();
 
+            FilledTagNames();
+
+            _bIsSelected = false;
             SetLoading(false);
             simulation_repo_textBox.Text = "master";
             SimulationList.DataContext = _SimulationListObjects;
+            listBoxSearch.Visibility = Visibility.Hidden;
+            
+        }
+
+        private void FilledTagNames()
+        {
+            _TagNamesList.Add(new TagNames("Placeholder"));
+            _TagNamesList.Add(new TagNames("Element"));
+            _TagNamesList.Add(new TagNames("Container"));
         }
 
         private void SetLoading(bool value)
@@ -241,13 +268,34 @@ namespace AssetsMatrix
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            //TextBoxChanged();
+            listBoxSearch.Visibility = Visibility.Visible;
+            string inputText = textBox.Text;
+            if (string.IsNullOrEmpty(inputText))
+            {
+                return;
+            }
+
+            string lowerCaseInputText = inputText.ToLower();
+
+            listBoxSearch.Items.Clear();
+            listBoxSearch.Height = HEIGHT;
+            foreach (var elem in _TagNamesList)
+            {
+                string lowerCaseName = elem.Name.ToLower();
+                if (lowerCaseName.Contains(lowerCaseInputText))
+                {
+                    listBoxSearch.Items.Add(elem.Name);
+                    listBoxSearch.Height += HEIGHT;
+                }
+            }
+
+           
         }
 
         private void TextBoxChanged()
         {
             _SimulationListObjects.Clear();
-
+            
             if (string.IsNullOrEmpty(textBox.Text))
                 return;
 
@@ -296,18 +344,38 @@ namespace AssetsMatrix
             if (e.Key == Key.Return)
             {
                 TextBoxChanged();
+                listBoxSearch.Visibility = Visibility.Hidden;
             }
+
+            
            
         }
 
         private void textBox_GotFocus_1(object sender, RoutedEventArgs e)
         {
-            textBox.Text = "";
+            if (_bIsSelected == false)
+            {
+                textBox.Text = "";
+            }
+            
+            listBoxSearch.Visibility = Visibility.Visible;
         }
 
         private void SimulationList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             throw new NotImplementedException();
+        }
+        
+        private void ListBoxSearch_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox combo = (ListBox)sender;
+            if (combo.SelectedItem != null)
+            {
+                textBox.Text = combo.SelectedValue.ToString();
+                listBoxSearch.Visibility = Visibility.Hidden;
+                TextBoxChanged();
+                _bIsSelected = true;
+            }
         }
     }
 }

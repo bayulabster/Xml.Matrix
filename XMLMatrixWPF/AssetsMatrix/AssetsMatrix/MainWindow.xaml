@@ -64,5 +64,6 @@
         <TextBox x:Name="simulation_repo_textBox" HorizontalAlignment="Left" Height="26" Margin="1039,74,0,0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top" Width="120" Background="#FF454849" Foreground="White" FontSize="15" SelectionBrush="White" BorderBrush="{x:Null}" CaretBrush="White" MaxLines="1"/>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="31,615,0,0" TextWrapping="Wrap" Text="Total Sim Found : " VerticalAlignment="Top" Foreground="White"/>
         <TextBlock x:Name="totalSimFound" HorizontalAlignment="Left" Margin="188,615,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Foreground="White"/>
+        <ListBox x:Name="listBoxSearch"  VerticalAlignment="Top" HorizontalAlignment="Left" SelectionChanged="ListBoxSearch_OnSelectionChanged" Margin="193,60,0,0" Width="628" Background="#FF292F31" Foreground="White" BorderBrush="#FF292626"/>
     </Grid>
 </Window>
