@@ -6,7 +6,9 @@ using System.Windows.Input;
 using AssetsMatrix.Core;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using Octokit;
 
@@ -100,9 +102,41 @@ namespace AssetsMatrix
 
         private void FilledTagNames()
         {
-            _TagNamesList.Add(new TagNames("Placeholder"));
-            _TagNamesList.Add(new TagNames("Element"));
-            _TagNamesList.Add(new TagNames("Container"));
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourcePath = "AssetsMatrix.TagNames.txt";
+
+            string result = string.Empty;
+            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    result = reader.ReadToEnd();
+                }
+            }
+
+            List<string> listString = GetSplitString(result);
+
+            foreach (var elem in listString)
+            {
+                _TagNamesList.Add(new TagNames(elem));   
+            }
+        }
+
+        private List<String> GetSplitString(string value)
+        {
+            List<String> returnedString = new List<string>();
+
+            string returnValue = value;
+            string[] stringArray = returnValue.Split('\n');
+            foreach (string s in stringArray)
+            {
+                s.Replace("\r\n", "");
+                if(s.Length>0)
+                {
+                    returnedString.Add(AssetMatrixStaticFunction.ExtractStringFromPath(s));
+                }
+            }
+            return returnedString;
         }
 
         private void SetLoading(bool value)
@@ -301,7 +335,7 @@ namespace AssetsMatrix
 
             int simcounter = 0;
             
-            string lowerCaseTextBox = textBox.Text;
+            XElement lowerCaseTextBox = CreateXElementFromSearchedText();
             foreach (SimulationItemData simulation in _SimulationItemData)
             {
                 int counterSearch = simulation.SearchInXML(lowerCaseTextBox);
@@ -371,7 +405,8 @@ namespace AssetsMatrix
             ListBox combo = (ListBox)sender;
             if (combo.SelectedItem != null)
             {
-                textBox.Text = combo.SelectedValue.ToString();
+                string cleanedUpString = combo.SelectedItem.ToString().Replace("\r","");
+                textBox.Text = cleanedUpString;
                 listBoxSearch.Visibility = Visibility.Hidden;
                 TextBoxChanged();
                 _bIsSelected = true;

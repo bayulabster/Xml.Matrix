@@ -33,9 +33,16 @@ namespace AssetsMatrix.Core
         public static string ExtractString_filetype(string s)
         {
             int idx = s.IndexOf('.');
-            string sRemove = s.Remove(idx);
+            if (idx == -1)
+            {
+                return s;    
+            }
 
+            string sRemove = s.Remove(idx);
             return sRemove;
+
+            
+
         }
 
         public static string TrimString(string s)
@@ -43,6 +50,11 @@ namespace AssetsMatrix.Core
             string sTrim = ReverseString(s);
             if (s == null) return null;
             int idx = sTrim.IndexOf('/');
+            if (idx == -1)
+            {
+                return s;
+            }
+            
             string sRemove = sTrim.Remove(idx);
             string sResult = ReverseString(sRemove);
 

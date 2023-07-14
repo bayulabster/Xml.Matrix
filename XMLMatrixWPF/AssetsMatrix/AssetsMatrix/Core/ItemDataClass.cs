@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -206,17 +207,68 @@ namespace AssetsMatrix.Core
         }
 
         
-        public int SearchInXML(string elem)
+        public int SearchInXML(XElement elem)
         {
             int counter = 0;
-            string toLowerString = elem.ToLower();
+            if (elem.HasAttributes)
+            {
+                counter = ProcessNoAttributeCalculation(elem);
+            }
+            else
+            {
+                counter = ProcessAttributeCalculation(elem);
+            }
+            
+            return counter;
+        }
+
+        private int ProcessAttributeCalculation(XElement elem)
+        {
+            int counter = 0;
+            string toLowerString = elem.Name.LocalName.ToString().ToLower();
             foreach (var el in Document.Elements().DescendantsAndSelf())
             {
                 if (el.Name.LocalName.ToLower() != toLowerString)
                 {
                     continue;
                 }
+
                 counter++;
+            }
+
+            return counter;
+        }
+
+        private int ProcessNoAttributeCalculation(XElement elem)
+        {
+            int counter = 0;
+            bool hasAttribute = false;
+            foreach (var el in Document.Elements().DescendantsAndSelf())
+            {
+                if (el.Name.ToString().ToLower() != elem.Name.ToString().ToLower())
+                {
+                        continue;
+                }
+
+                hasAttribute = false;
+
+                foreach (var attr in el.Attributes())
+                {
+                    foreach (var elemattr in elem.Attributes())
+                    {
+                        if (attr.Name.ToString().ToLower() == elemattr.Name.ToString().ToLower() &&
+                            attr.Value.ToLower() == elemattr.Value.ToLower())
+                        {
+                            hasAttribute = true;
+                        }
+                    }
+                }
+
+                if (hasAttribute)
+                {
+                    counter++;
+                    hasAttribute = false;
+                }
             }
             return counter;
         }
