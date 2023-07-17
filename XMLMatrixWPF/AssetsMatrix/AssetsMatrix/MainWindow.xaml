@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssetsMatrix"
         mc:Ignorable="d"
-        Title="Assets Matrix" WindowStartupLocation="CenterScreen" Cursor="Arrow" Height="720" Background="#FF1B1B1D" Width="1280" ResizeMode="CanMinimize" FontSize="20">
+        Title="Assets Matrix" WindowStartupLocation="CenterScreen" Cursor="Arrow" Height="720" Background="#FF1B1B1D" Width="1280" ResizeMode="CanMinimize" FontSize="20"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com">
     <Grid Cursor="Arrow">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -51,7 +52,8 @@
         </Rectangle>
         <Label x:Name="label1" Content="Simulation List" HorizontalAlignment="Left" Margin="31,67,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" FontFamily="Segoe UI Semibold" Height="30" Width="104" FontStretch="Condensed"/>
         <Image x:Name="Labster___Copy_png1" Margin="31,10,1122.6,645.4" Source="Labster - Copy.png" Stretch="Fill"/>
-        <Image x:Name="ajax1_loader_gif" Margin="585,364,561,312" Source="ajax1-loader.gif" Stretch="Fill"/>
+        <Image x:Name="ajax1_loader_gif" gif:ImageBehavior.AnimatedSource="rumba-lobster.gif" gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AutoStart="True" Margin="550,307,552,219" Source="/rumba-lobster.gif" Stretch="Fill"/>
+
         <TextBox x:Name="textBox" GotFocus="textBox_GotFocus_1" KeyDown="InputBoxKeyDown"  HorizontalAlignment="Left" Height="39" Margin="191,21,0,0" Text='Search By TagName e.g Element Id="LabPad"'  VerticalAlignment="Top" Width="630" Background="#FF292F31" BorderBrush="{x:Null}" Foreground="#FF635858" FontFamily="Segoe UI Semibold" TextWrapping="WrapWithOverflow" FontSize="16" UndoLimit="91"/>
         <ListBox x:Name="SearchListBox" SelectionChanged="SearchListBox_SelectionChanged" Background="Gray"  HorizontalAlignment="Right" VerticalAlignment="Top" Width="688" Margin="0,67,276,0" Visibility="Collapsed"/>
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,8 +10,11 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Media.Animation;
 using System.Xml.Linq;
 using Octokit;
+using System.Net;
+using System.Resources;
 
 
 namespace AssetsMatrix
@@ -58,6 +62,7 @@ namespace AssetsMatrix
     public partial class MainWindow : Window
     {
         private const string IMAGE_FILEPATH = "http://labsterim.s3.amazonaws.com/media/labimages/PrefabData/";
+        private const string CREDENTIAL_FILEPATH = "CREDENTIAL.resource";
         private const double HEIGHT = 30;
 
         private List<SimulationItemData> _SimulationItemData;
@@ -90,6 +95,7 @@ namespace AssetsMatrix
             _AnimationListItemDataGithub = new List<GithubAnimationDataClass>();
             _CharacterListItemDataGithub = new List<GithubCharacterDataClass>();
 
+            ReadUserNameAndCredential();
             FilledTagNames();
 
             _bIsSelected = false;
@@ -98,6 +104,43 @@ namespace AssetsMatrix
             SimulationList.DataContext = _SimulationListObjects;
             listBoxSearch.Visibility = Visibility.Hidden;
             
+        }
+
+        private void ReadUserNameAndCredential()
+        {
+            try
+            {
+                using (ResourceReader reader = new ResourceReader(CREDENTIAL_FILEPATH))
+                {
+                    if (reader == null)
+                    {
+                        return;
+                    }
+
+                    string username = string.Empty;
+                    string password = string.Empty;
+                    foreach (DictionaryEntry elem in reader)
+                    {
+                        if ((string)elem.Key == "username")
+                        {
+                            username = (string)elem.Value;
+                        }
+                        else if ((string)elem.Key == "password")
+                        {
+                            password = (string)elem.Value;
+                        }
+
+                    }
+
+                    username_field.Text = username;
+                    password_field.Text = password;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
         }
 
         private void FilledTagNames()
@@ -237,8 +280,27 @@ namespace AssetsMatrix
                 return;
             }
 
+            SaveCredentials(username, password);
+
             SetLoading(true);
             FethcingDataFromGithub();
+        }
+
+        private void SaveCredentials(string username, string password)
+        {
+            //TODO : write to file the username and password
+
+            using (ResourceWriter writer = new ResourceWriter(CREDENTIAL_FILEPATH))
+            {
+                if (writer == null)
+                {
+                    return;
+                }
+
+                writer.AddResource("username", username);
+                writer.AddResource("password", password);
+                writer.Close();
+            }
         }
 
         private void FethcingDataFromGithub()
@@ -336,6 +398,10 @@ namespace AssetsMatrix
             int simcounter = 0;
             
             XElement lowerCaseTextBox = CreateXElementFromSearchedText();
+            if (lowerCaseTextBox == null)
+            {
+                return;
+            }
             foreach (SimulationItemData simulation in _SimulationItemData)
             {
                 int counterSearch = simulation.SearchInXML(lowerCaseTextBox);
@@ -367,10 +433,20 @@ namespace AssetsMatrix
                 lowerCaseTextBox = lowerCaseTextBox + " />";
             }
 
-            XDocument doc = XDocument.Parse(lowerCaseTextBox);
-            XElement returnedValue = doc.Root;
+            try
+            {
+                XDocument doc = XDocument.Parse(lowerCaseTextBox);
+                XElement returnedValue = doc.Root;
 
-            return returnedValue;
+                return returnedValue;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return null;
+
         }
 
         private void InputBoxKeyDown(object sender, KeyEventArgs e)
@@ -380,8 +456,6 @@ namespace AssetsMatrix
                 TextBoxChanged();
                 listBoxSearch.Visibility = Visibility.Hidden;
             }
-
-            
            
         }
 
@@ -397,7 +471,7 @@ namespace AssetsMatrix
 
         private void SimulationList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            throw new NotImplementedException();
+
         }
         
         private void ListBoxSearch_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
